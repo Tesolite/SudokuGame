@@ -7,9 +7,9 @@ public class Sudoku {
         //  System.out.println(Arrays.toString(sudoku[2]));
         sudoku[2][5] = 1;
         printGrid(sudoku);
-        //  System.out.println(validRows(sudoku));
-        //System.out.println(validColumns(sudoku));
-        validBlocks(sudoku);
+        System.out.println(validRows(sudoku));
+        System.out.println(validColumns(sudoku));
+        System.out.println(validBlocks(sudoku));
     }
 
 
@@ -26,9 +26,8 @@ public class Sudoku {
     }
 
     static void printGrid(int[][] grid) {
-        int rowLength = grid.length;
-        for (int row = 0; row < rowLength; row++) {
-            for (int num : grid[row]) {
+        for (int[] row : grid) {
+            for (int num : row) {
                 System.out.print(num);
             }
             System.out.println();
@@ -37,16 +36,11 @@ public class Sudoku {
     }
 
     private static boolean validRows(int[][] grid) {
-        int[] allValuesInRow = new int[grid.length];
         int flag = 0;
 
-        for (int row = 0; row < grid.length; row++) {
-            for (int num = 0; num < grid[row].length; num++) {
-                allValuesInRow[num] = grid[row][num];
-            }
-            if (Arrays.stream(allValuesInRow).distinct().count() != allValuesInRow.length) {
+        for (int[] row : grid) {
+            if (Arrays.stream(row).distinct().count() != row.length) {
                 flag = 1;
-                System.out.println(Arrays.toString(allValuesInRow));
             }
 
         }
@@ -78,7 +72,7 @@ public class Sudoku {
         }
     }
 
-    static void validBlocks(int[][] grid) {
+    private static boolean validBlocks(int[][] grid) {
         int[] allValuesInBlock = new int[grid.length];
         int flag = 0;
         int blockStartColumn = 0;
@@ -96,7 +90,7 @@ public class Sudoku {
 
                 allValuesInBlock[blockArrayIndex] = grid[currentRow][currentColumn];
                 blockArrayIndex++;
-                System.out.println (currentRow + "," + currentColumn);
+                //System.out.println (currentRow + "," + currentColumn);
 
                 if(blockArrayIndex == grid.length && blockEndColumn <= grid.length){
                     if(Arrays.stream(allValuesInBlock).distinct().count() != allValuesInBlock.length)
@@ -104,12 +98,12 @@ public class Sudoku {
                         flag = 1;
                     }
                     blockStartColumn = currentColumn + 1;
-                    System.out.println("Block start column: " + blockStartColumn);
+                    //System.out.println("Block start column: " + blockStartColumn);
                     blockEndColumn += gridSqrt;
-                    System.out.println("block end column: " + blockEndColumn);
-                    System.out.println("block values: " + Arrays.toString(allValuesInBlock));
+                    //System.out.println("block end column: " + blockEndColumn);
+                    //System.out.println("block values: " + Arrays.toString(allValuesInBlock));
                     blockArrayIndex = 0;
-                    System.out.println("block array index : " + blockArrayIndex);
+                    //System.out.println("block array index : " + blockArrayIndex);
                     blocksInRow++;
                 }
 
@@ -120,11 +114,11 @@ public class Sudoku {
                 } else if(blocksInRow == gridSqrt){
                     blockStartRow = currentRow + 1;
                     blockStartColumn = 0;
-                    System.out.println("currentRow: " + currentRow);
-                    System.out.println("Block start row: " + blockStartRow);
+                   //System.out.println("currentRow: " + currentRow);
+                   //System.out.println("Block start row: " + blockStartRow);
                     blockEndRow += gridSqrt;
                     blockEndColumn = gridSqrt;
-                    System.out.println("Block end row: " + blockEndRow);
+                   // System.out.println("Block end row: " + blockEndRow);
                     blocksInRow = 0;
                     previousBlocksInRow = 0;
                 }
@@ -134,7 +128,10 @@ public class Sudoku {
         }
         if(flag == 1)
         {
-            
+            return false;
+        }
+        else{
+            return true;
         }
     }
 }
