@@ -8,13 +8,13 @@ public class Sudoku {
     public static void main(String[] args) {
         int[][] sudoku = makeGrid(9);
         //  System.out.println(Arrays.toString(sudoku[2]));
-        sudoku[2][5] = 1;
-        sudoku[3][5] = 1;
+        sudoku[0][1] = 1;
+        sudoku[1][2] = 1;
         printGrid(sudoku);
 
-        //System.out.println(validRows(sudoku));
-        //System.out.println(validColumns(sudoku));
-        //System.out.println(validBlocks(sudoku));
+        System.out.println(validRows(sudoku));
+        System.out.println(validColumns(sudoku));
+        System.out.println(validBlocks(sudoku));
         //System.out.println(validBoard(sudoku));
 
         printGrid(generateBoard(sudoku));
@@ -58,7 +58,7 @@ public class Sudoku {
 
                 }
             }
-            System.out.println(allValuesInRow.toString());
+            //System.out.println(allValuesInRow.toString());
             if(allValuesInRow.size() != uniqueValuesInRow.size()){
                 flag = 1;
             }
@@ -87,7 +87,7 @@ public class Sudoku {
 
             }
 
-            System.out.println(allValuesInColumn.toString());
+            //System.out.println(allValuesInColumn.toString());
 
             if (allValuesInColumn.size() != uniqueValuesInColumn.size()) {
                 //System.out.println(Arrays.toString(allValuesInColumn));
@@ -104,7 +104,8 @@ public class Sudoku {
     }
 
     private static boolean validBlocks(int[][] grid) {
-        int[] allValuesInBlock = new int[grid.length];
+        ArrayList<Integer> allValuesInBlock = new ArrayList<>();
+        HashSet<Integer> uniqueValuesInBlock = new HashSet<>();
         int flag = 0;
         int blockStartColumn = 0;
         int gridSqrt = (int) Math.sqrt(grid.length);
@@ -118,14 +119,15 @@ public class Sudoku {
 
         for (int currentRow = blockStartRow; currentRow >= blockStartRow && currentRow < blockEndRow && currentRow != grid.length; currentRow++) {
             for (int currentColumn = blockStartColumn; currentColumn >= blockStartColumn && currentColumn < blockEndColumn && currentColumn != grid.length; currentColumn++) {
-
-                allValuesInBlock[blockArrayIndex] = grid[currentRow][currentColumn];
+                if(grid[currentRow][currentColumn] != 0){
+                    allValuesInBlock.add(grid[currentRow][currentColumn]);
+                    uniqueValuesInBlock.add(grid[currentRow][currentColumn]);
+                }
                 blockArrayIndex++;
                 //System.out.println (currentRow + "," + currentColumn);
 
                 if(blockArrayIndex == grid.length && blockEndColumn <= grid.length){
-                    if(Arrays.stream(allValuesInBlock).distinct().count() != allValuesInBlock.length)
-                    {
+                    if(allValuesInBlock.size() != uniqueValuesInBlock.size()){
                         flag = 1;
                     }
                     blockStartColumn = currentColumn + 1;
@@ -136,6 +138,8 @@ public class Sudoku {
                     blockArrayIndex = 0;
                     //System.out.println("block array index : " + blockArrayIndex);
                     blocksInRow++;
+                    allValuesInBlock.clear();
+                    uniqueValuesInBlock.clear();
                 }
 
 
