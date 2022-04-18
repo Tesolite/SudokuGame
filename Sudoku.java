@@ -1,4 +1,6 @@
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Sudoku {
@@ -7,12 +9,13 @@ public class Sudoku {
         int[][] sudoku = makeGrid(9);
         //  System.out.println(Arrays.toString(sudoku[2]));
         sudoku[2][5] = 1;
+        sudoku[3][5] = 1;
         printGrid(sudoku);
 
-        System.out.println(validRows(sudoku));
-        System.out.println(validColumns(sudoku));
-        System.out.println(validBlocks(sudoku));
-        System.out.println(validBoard(sudoku));
+        //System.out.println(validRows(sudoku));
+        //System.out.println(validColumns(sudoku));
+        //System.out.println(validBlocks(sudoku));
+        //System.out.println(validBoard(sudoku));
 
         printGrid(generateBoard(sudoku));
     }
@@ -41,13 +44,26 @@ public class Sudoku {
     }
 
     private static boolean validRows(int[][] grid) {
+        ArrayList<Integer> allValuesInRow = new ArrayList<>();
+        HashSet<Integer> uniqueValuesInRow = new HashSet<>();
         int flag = 0;
 
-        for (int[] row : grid) {
-            if (Arrays.stream(row).distinct().count() != row.length) {
+        for (int row = 0; row < grid.length; row++) {
+            for(int columnIndex = 0; columnIndex < grid.length; columnIndex++)
+            {
+                if(grid[row][columnIndex] != 0)
+                {
+                    allValuesInRow.add(grid[row][columnIndex]);
+                    uniqueValuesInRow.add(grid[row][columnIndex]);
+
+                }
+            }
+            System.out.println(allValuesInRow.toString());
+            if(allValuesInRow.size() != uniqueValuesInRow.size()){
                 flag = 1;
             }
-
+            allValuesInRow.clear();
+            uniqueValuesInRow.clear();
         }
         if (flag == 1) {
             return false;
@@ -57,23 +73,28 @@ public class Sudoku {
     }
 
     private static boolean validColumns(int[][] grid) {
-        int[] allValuesInColumn = new int[grid.length];
-        int valueCounter = 0;
+        //int[] allValuesInColumn = new int[grid.length];
+        ArrayList<Integer> allValuesInColumn = new ArrayList<>();
+        HashSet<Integer> uniqueValuesInColumn = new HashSet<>();
         int flag = 0;
 
         for (int column = 0; column < grid.length; column++) {
             for (int rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-                allValuesInColumn[rowIndex] = grid[rowIndex][column];
                 if(grid[rowIndex][column] != 0){
-                    valueCounter++;
+                    allValuesInColumn.add(grid[rowIndex][column]);
+                    uniqueValuesInColumn.add(grid[rowIndex][column]);
                 }
-            }
-            System.out.println(Arrays.toString(allValuesInColumn) + ": " + "Values:" + valueCounter + " Distinct:" + Arrays.stream(allValuesInColumn).distinct().count() + "," + "Total:" + allValuesInColumn.length);
 
-            if (Arrays.stream(allValuesInColumn).distinct().count() != allValuesInColumn.length) {
+            }
+
+            System.out.println(allValuesInColumn.toString());
+
+            if (allValuesInColumn.size() != uniqueValuesInColumn.size()) {
                 //System.out.println(Arrays.toString(allValuesInColumn));
                 flag = 1;
             }
+            allValuesInColumn.clear();
+            uniqueValuesInColumn.clear();
         }
         if (flag == 1) {
             return false;
