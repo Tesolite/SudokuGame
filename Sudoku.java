@@ -188,15 +188,15 @@ public class Sudoku {
         int offsetCounter = 0;
 
         for(int row = 0; row < grid.length; row++){
-            
+
             if(row % gridSqrt == 0 && row != 0){
                 offsetCounter++;
                 columnIndex = 0;
             }
-
             int currentColumn = offsetCounter + columnIndex;
+
             grid[row][currentColumn] = random.nextInt(grid.length) + 1;
-            System.out.println("grid[" + row + "][" + currentColumn + "]");
+            //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
 /*
