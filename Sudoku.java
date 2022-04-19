@@ -8,14 +8,15 @@ public class Sudoku {
     public static void main(String[] args) {
         int[][] sudoku = makeGrid(9);
         //  System.out.println(Arrays.toString(sudoku[2]));
-        sudoku[0][1] = 1;
-        sudoku[1][2] = 1;
+        //sudoku[0][1] = 1;
+        //sudoku[0][2] = 1;
         printGrid(sudoku);
+        sudoku = generateBoard(sudoku);
 
-        System.out.println(validRows(sudoku));
-        System.out.println(validColumns(sudoku));
-        System.out.println(validBlocks(sudoku));
-        //System.out.println(validBoard(sudoku));
+        System.out.println("Rows valid: " + validRows(sudoku));
+        System.out.println("Columns valid: " + validColumns(sudoku));
+        System.out.println("Blocks valid: " + validBlocks(sudoku));
+        System.out.println("Board valid: " + validBoard(sudoku));
 
         printGrid(generateBoard(sudoku));
     }
@@ -182,17 +183,35 @@ public class Sudoku {
 
     private static int[][] generateBoard(int[][] grid){
         Random random = new Random();
+        int gridSqrt = (int) Math.sqrt(grid.length);
+        int columnIndex = 0;
+        int offsetCounter = 0;
 
+        for(int row = 0; row < grid.length; row++){
+            
+            if(row % gridSqrt == 0 && row != 0){
+                offsetCounter++;
+                columnIndex = 0;
+            }
+
+            int currentColumn = offsetCounter + columnIndex;
+            grid[row][currentColumn] = random.nextInt(grid.length) + 1;
+            System.out.println("grid[" + row + "][" + currentColumn + "]");
+            columnIndex += gridSqrt;
+        }
+/*
         grid[0][0] = random.nextInt(9) + 1;
-        grid[1][4] = random.nextInt(9) + 1;
-        grid[2][8] = random.nextInt(9) + 1;
+        grid[1][3] = random.nextInt(9) + 1;
+        grid[2][6] = random.nextInt(9) + 1;
         grid[3][1] = random.nextInt(9) + 1;
-        grid[4][5] = random.nextInt(9) + 1;
-        grid[5][6] = random.nextInt(9) + 1;
+        grid[4][4] = random.nextInt(9) + 1;
+        grid[5][7] = random.nextInt(9) + 1;
         grid[6][2] = random.nextInt(9) + 1;
-        grid[7][3] = random.nextInt(9) + 1;
-        grid[8][7] = random.nextInt(9) + 1;
+        grid[7][5] = random.nextInt(9) + 1;
+        grid[8][8] = random.nextInt(9) + 1;
 
+
+ */
         return grid;
 
     }
