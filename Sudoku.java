@@ -8,7 +8,7 @@ public class Sudoku {
     public static void main(String[] args) {
         int[][] sudoku = makeGrid(9);
         //  System.out.println(Arrays.toString(sudoku[2]));
-        //sudoku[0][1] = 1;
+        //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
         printGrid(sudoku);
         sudoku = generateBoard(sudoku);
@@ -17,8 +17,9 @@ public class Sudoku {
         System.out.println("Columns valid: " + validColumns(sudoku));
         System.out.println("Blocks valid: " + validBlocks(sudoku));
         System.out.println("Board valid: " + validBoard(sudoku));
+        System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudoku, 0, 1, 1));
 
-        printGrid(generateBoard(sudoku));
+        printGrid(sudoku);
     }
 
 
@@ -181,6 +182,18 @@ public class Sudoku {
         }
     }
 
+    private static boolean validMove(int[][] grid, int row, int column, int number){
+        int[][] testGrid = Arrays.stream(grid).map(int[]::clone).toArray(int[][]::new);
+        testGrid[row][column] = number;
+
+        if(validBoard(testGrid) == true){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     private static int[][] generateBoard(int[][] grid){
         Random random = new Random();
         int gridSqrt = (int) Math.sqrt(grid.length);
@@ -199,22 +212,27 @@ public class Sudoku {
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
-/*
-        grid[0][0] = random.nextInt(9) + 1;
-        grid[1][3] = random.nextInt(9) + 1;
-        grid[2][6] = random.nextInt(9) + 1;
-        grid[3][1] = random.nextInt(9) + 1;
-        grid[4][4] = random.nextInt(9) + 1;
-        grid[5][7] = random.nextInt(9) + 1;
-        grid[6][2] = random.nextInt(9) + 1;
-        grid[7][5] = random.nextInt(9) + 1;
-        grid[8][8] = random.nextInt(9) + 1;
 
+        for(int row = 0; row < grid.length; row++){
+            for(int column = 0; column < grid.length; column++){
+                if(grid[row][column] == 0){
+                    for(int value = 1; value < 10; value++){
+                        if(validMove(grid, row, column, value)){
+                            grid[row][column] = value;
+                        }
+                        if(validMove(grid, row, column, value) == true){
+                            grid[row][column] = value;
+                        }
+                        else{
+                            value++;
+                        }
+                    }
+                }
+            }
+        }
 
- */
         return grid;
 
     }
 }
-
 
