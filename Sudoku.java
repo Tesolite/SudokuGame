@@ -20,6 +20,9 @@ public class Sudoku {
         System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudoku, 0, 1, 1));
 
         printGrid(sudoku);
+        generateBoardComplete(sudoku);
+        printGrid(sudoku);
+        System.out.println("fin");
     }
 
 
@@ -212,26 +215,42 @@ public class Sudoku {
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
+        return grid;
 
-        for(int row = 0; row < grid.length; row++){
-            for(int column = 0; column < grid.length; column++){
-                if(grid[row][column] == 0){
-                    for(int value = 1; value < 10; value++){
-                        if(validMove(grid, row, column, value)){
+    }
+
+    private static boolean generateBoardComplete(int[][] grid){
+
+        for(int row = 0; row < grid.length; row++) {
+            for (int column = 0; column < grid.length; column++) {
+                if (grid[row][column] == 0) {
+                    for (int value = 1; value < 10; value++) {
+                        if (validMove(grid, row, column, value)) {
                             grid[row][column] = value;
                         }
-                        if(validMove(grid, row, column, value) == true){
+                        if (validMove(grid, row, column, value) == true) {
                             grid[row][column] = value;
-                        }
-                        else{
-                            value++;
+                            if (generateBoardComplete(grid)) {
+                                return true;
+
+                            }
+                        } else {
+                            grid[row][column] = 0;
                         }
                     }
+                    return false;
                 }
-            }
-        }
+                //System.out.print("\033[H\033[2J");
+                //System.out.flush();
+                //printGrid(grid);
 
-        return grid;
+            }
+
+        }
+        return true;
+    }
+
+    private static void safeGeneration(int[][] grid){
 
     }
 }
