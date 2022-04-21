@@ -1,3 +1,4 @@
+import java.util.Timer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class Sudoku {
         //  System.out.println(Arrays.toString(sudoku[2]));
         //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
-        printGrid(sudoku);
+        //printGrid(sudoku);
         sudoku = generateBoard(sudoku);
 
         System.out.println("Rows valid: " + validRows(sudoku));
@@ -19,10 +20,10 @@ public class Sudoku {
         System.out.println("Board valid: " + validBoard(sudoku));
         System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudoku, 0, 1, 1));
 
-        printGrid(sudoku);
+        //printGrid(sudoku);
         generateBoardComplete(sudoku);
         printGrid(sudoku);
-        System.out.println("fin");
+        //System.out.println("fin");
     }
 
 
@@ -220,10 +221,12 @@ public class Sudoku {
     }
 
     private static boolean generateBoardComplete(int[][] grid){
+        long genStart = System.currentTimeMillis();
 
         for(int row = 0; row < grid.length; row++) {
             for (int column = 0; column < grid.length; column++) {
                 if (grid[row][column] == 0) {
+
                     for (int value = 1; value < 10; value++) {
                         if (validMove(grid, row, column, value)) {
                             grid[row][column] = value;
@@ -237,6 +240,26 @@ public class Sudoku {
                         } else {
                             grid[row][column] = 0;
                         }
+
+                        if(row != grid.length - 1 && column != grid.length - 1){
+                            long checkTime = System.currentTimeMillis();
+                            long genTime = checkTime - genStart;
+                            if(genTime > 7000){
+                                System.out.println("Error generating board, retrying...");
+                                for(int resetRow = 0; resetRow < grid.length; resetRow++){
+                                    for(int resetColumn = 0; resetColumn < grid.length; resetColumn++){
+                                        grid[resetRow][resetColumn] = 0;
+                                    }
+                                }
+                                grid = generateBoard(grid);
+                                generateBoardComplete(grid);
+                                row = 0;
+                                column = 0;
+                                value = 0;
+                                genStart = System.currentTimeMillis();
+                            }
+
+                        }
                     }
                     return false;
                 }
@@ -248,10 +271,6 @@ public class Sudoku {
 
         }
         return true;
-    }
-
-    private static void safeGeneration(int[][] grid){
-
     }
 }
 
