@@ -11,6 +11,8 @@ public class Sudoku {
         //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
         //printGrid(sudoku);
+
+        //GAME PRESENTED TO USER WILL HAVE 3 VALUES REMOVED FROM EACH BLOCK
         sudoku = generateBoard(sudoku);
 
         System.out.println("Rows valid: " + validRows(sudoku));
@@ -23,14 +25,15 @@ public class Sudoku {
         generateBoardComplete(sudoku);
         printGrid(sudoku);
         //System.out.println("fin");
+        System.out.println(validBoard(sudoku));
     }
 
 
     static int[][] makeGrid(int size) {
 
         int[][] sudokuGrid = new int[size][size];
-        for (int row = 0; row < 9; row++) {
-            for (int column = 0; column < 9; column++) {
+        for (int row = 0; row < size; row++) {
+            for (int column = 0; column < size; column++) {
                 sudokuGrid[row][column] = 0;
             }
         }
@@ -211,7 +214,7 @@ public class Sudoku {
             }
             int currentColumn = offsetCounter + columnIndex;
 
-            grid[row][currentColumn] = random.nextInt(grid.length) + 1;
+            grid[row][currentColumn] = random.nextInt(9) + 1;
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
