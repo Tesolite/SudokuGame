@@ -42,11 +42,44 @@ public class Sudoku {
     }
 
     static void printGrid(int[][] grid) {
+        int rowNum = 0;
+        int columnNum = 0;
+        int gridSqrt = (int) Math.sqrt(grid.length);
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        System.out.print("\t ");
+        for(int i = 0; i < grid.length; i++){
+            if(i % gridSqrt == 0 && i != 0){
+                System.out.print(" ".repeat(gridSqrt));
+            }
+            if((i + 1) % gridSqrt ==0){
+                System.out.print(alphabet.charAt(i));
+            }else {
+                System.out.print(alphabet.charAt(i) + " ");
+            }
+        }
+        System.out.println();
         for (int[] row : grid) {
+            if(rowNum % gridSqrt == 0 && rowNum != 0){
+                System.out.println("---".repeat(row.length));
+            }
+            rowNum++;
+            System.out.print("[" + rowNum + "]  ");
+
             for (int num : row) {
-                System.out.print(num);
+                if(columnNum % gridSqrt == 0 && columnNum != 0){
+                    System.out.print(" | ");
+                }
+                if((columnNum + 1) % gridSqrt == 0){
+                    System.out.print(num);
+                }else{
+                    System.out.print(num + "-");
+                }
+                columnNum++;
+
+
             }
             System.out.println();
+            columnNum = 0;
         }
         System.out.println();
     }
@@ -214,7 +247,7 @@ public class Sudoku {
             }
             int currentColumn = offsetCounter + columnIndex;
 
-            grid[row][currentColumn] = random.nextInt(9) + 1;
+            grid[row][currentColumn] = random.nextInt(grid.length) + 1;
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
