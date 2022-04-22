@@ -1,35 +1,92 @@
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.HashMap;
+import java.util.*;
 
 public class Sudoku {
 
     public static void main(String[] args) {
-        int[][] sudoku = makeGrid(9);
+        int[][] sudokuAnswers = makeGrid(9);
         //  System.out.println(Arrays.toString(sudoku[2]));
         //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
         //printGrid(sudoku);
 
         //GAME PRESENTED TO USER WILL HAVE 3 VALUES REMOVED FROM EACH BLOCK
-        sudoku = generateBoard(sudoku);
 
-        System.out.println("Rows valid: " + validRows(sudoku));
-        System.out.println("Columns valid: " + validColumns(sudoku));
-        System.out.println("Blocks valid: " + validBlocks(sudoku));
-        System.out.println("Board valid: " + validBoard(sudoku));
-        System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudoku, 0, 1, 1));
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("Generating Board...");
+        generateBoard(sudokuAnswers);
+        generateBoardComplete(sudokuAnswers);
+        System.out.println("Generation complete");
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println();
+        System.out.println();
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("Checking generated board... ");
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("Rows valid: " + validRows(sudokuAnswers));
+        System.out.println("Columns valid: " + validColumns(sudokuAnswers));
+        System.out.println("Blocks valid: " + validBlocks(sudokuAnswers));
+        System.out.println("Board valid: " + validBoard(sudokuAnswers));
+        System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudokuAnswers, 0, 1, 1));
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("Choose your difficulty: \t [E]asy \t [M]edium \t [H]ard \t");
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println();
+
+        int[][] playerBoard = sudokuAnswers;
+        boolean validAnswer;
+        do {
+            validAnswer = true;
+            Scanner inputDifficulty = new Scanner(System.in);
+            System.out.print("Response: ");
+            String difficulty = inputDifficulty.nextLine();
+            System.out.println("Program received: " + difficulty);
+            System.out.println();
+            if (difficulty.equalsIgnoreCase("e")) {
+                playerBoard = hideValues(sudokuAnswers, 3);
+            } else if (difficulty.equalsIgnoreCase("m")) {
+                playerBoard = hideValues(sudokuAnswers, 4);
+            } else if (difficulty.equalsIgnoreCase("h")) {
+                playerBoard = hideValues(sudokuAnswers, 5);
+            } else {
+                System.out.println("Invalid answer. Please only enter the character in the brackets to make your choice.");
+                validAnswer = false;
+            }
+        } while (validAnswer == false);
+
+
+        //printGrid(sudokuAnswers);
 
         //printGrid(sudoku);
-        generateBoardComplete(sudoku);
-        printGrid(sudoku);
-        hideValues(sudoku,3);
-        printGrid(sudoku);
+        //int[][] playerBoard = hideValues(sudokuAnswers,3);
+        printGrid(playerBoard);
         //System.out.println("fin");
-        System.out.println(validBoard(sudoku));
+        System.out.println("Enter the move you would like to make (eg: B6 4)");
+        //while(emptySpace(playerBoard) == true){
+            Scanner inputMove = new Scanner(System.in);
+            String move = inputMove.nextLine().toUpperCase();
+            int rowNum = Integer.parseInt(move.substring(1,2));
+            int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
+            int inputValue = Integer.parseInt(move.substring(3,4));
+            boolean rowInRange = rowNum < playerBoard.length;
+            boolean columnInRange = columnNum < playerBoard.length;
+            boolean inputInRange = inputValue > 0 && inputValue <= playerBoard.length;
+            System.out.println(inputValue);
+            if(Character.isAlphabetic(move.charAt(0)) && columnInRange &&
+                    Character.isDigit(move.charAt(1)) && rowInRange &&
+                    Character.isSpaceChar(move.charAt(2)) &&
+                    Character.isDigit(move.charAt(3)) && inputInRange){
+
+                playerBoard[rowNum][columnNum] = inputValue;
+                printGrid(playerBoard);
+                System.out.println(playerBoard[rowNum][columnNum]);
+            }
+        //}
+
+
+
+
+        System.out.println(validBoard(playerBoard));
+        System.out.println(playerBoard[0][1]);
     }
 
 
@@ -50,7 +107,7 @@ public class Sudoku {
         int columnNum = 0;
         int gridSqrt = (int) Math.sqrt(grid.length);
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        System.out.print("\t ");
+        System.out.print("     ");
         for (int i = 0; i < grid.length; i++) {
             if (i % gridSqrt == 0 && i != 0) {
                 System.out.print(" ".repeat(gridSqrt));
@@ -74,9 +131,18 @@ public class Sudoku {
                     System.out.print(" | ");
                 }
                 if ((columnNum + 1) % gridSqrt == 0) {
-                    System.out.print(num);
+                    if(num == 0){
+                        System.out.print("0");
+                    }
+                    else{
+                        System.out.print(num);
+                    }
                 } else {
-                    System.out.print(num + "-");
+                    if(num == 0){
+                        System.out.print("0" + "-");
+                    }else{
+                        System.out.print(num + "-");
+                    }
                 }
                 columnNum++;
 
@@ -307,7 +373,7 @@ public class Sudoku {
         return true;
     }
 
-    static void hideValues(int[][] grid, int amountHidden) {
+    static int[][] hideValues(int[][] grid, int amountHidden) {
         Random hideIndex = new Random();
         HashSet<Integer> removeFromBlock = new HashSet<>();
         ArrayList<Integer> allValuesInBlock = new ArrayList<>();
@@ -341,7 +407,7 @@ public class Sudoku {
                     while (removeFromBlock.size() != amountHidden) {
                         removeFromBlock.add(hideIndex.nextInt(9));
                     }
-                    for(int removeIndex : removeFromBlock){
+                    for (int removeIndex : removeFromBlock) {
                         //allValuesInBlock.set(removeIndex, 0);
                         grid[gridLinkRow.get(allValuesInBlock.get(removeIndex))][gridLinkColumn.get(allValuesInBlock.get(removeIndex))] = 0;
                     }
@@ -377,7 +443,19 @@ public class Sudoku {
 
 
         }
+        return grid;
 
+    }
+
+    private static boolean emptySpace(int[][] grid) {
+        for (int[] row : grid) {
+            for (int num : row) {
+                if (num == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 
