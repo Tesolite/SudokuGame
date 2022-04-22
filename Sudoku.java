@@ -2,6 +2,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
+import java.util.HashMap;
 
 public class Sudoku {
 
@@ -23,6 +25,8 @@ public class Sudoku {
 
         //printGrid(sudoku);
         generateBoardComplete(sudoku);
+        printGrid(sudoku);
+        hideValues(sudoku,3);
         printGrid(sudoku);
         //System.out.println("fin");
         System.out.println(validBoard(sudoku));
@@ -47,31 +51,31 @@ public class Sudoku {
         int gridSqrt = (int) Math.sqrt(grid.length);
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         System.out.print("\t ");
-        for(int i = 0; i < grid.length; i++){
-            if(i % gridSqrt == 0 && i != 0){
+        for (int i = 0; i < grid.length; i++) {
+            if (i % gridSqrt == 0 && i != 0) {
                 System.out.print(" ".repeat(gridSqrt));
             }
-            if((i + 1) % gridSqrt ==0){
+            if ((i + 1) % gridSqrt == 0) {
                 System.out.print(alphabet.charAt(i));
-            }else {
+            } else {
                 System.out.print(alphabet.charAt(i) + " ");
             }
         }
         System.out.println();
         for (int[] row : grid) {
-            if(rowNum % gridSqrt == 0 && rowNum != 0){
+            if (rowNum % gridSqrt == 0 && rowNum != 0) {
                 System.out.println("---".repeat(row.length));
             }
             rowNum++;
             System.out.print("[" + rowNum + "]  ");
 
             for (int num : row) {
-                if(columnNum % gridSqrt == 0 && columnNum != 0){
+                if (columnNum % gridSqrt == 0 && columnNum != 0) {
                     System.out.print(" | ");
                 }
-                if((columnNum + 1) % gridSqrt == 0){
+                if ((columnNum + 1) % gridSqrt == 0) {
                     System.out.print(num);
-                }else{
+                } else {
                     System.out.print(num + "-");
                 }
                 columnNum++;
@@ -90,17 +94,15 @@ public class Sudoku {
         int flag = 0;
 
         for (int row = 0; row < grid.length; row++) {
-            for(int columnIndex = 0; columnIndex < grid.length; columnIndex++)
-            {
-                if(grid[row][columnIndex] != 0)
-                {
+            for (int columnIndex = 0; columnIndex < grid.length; columnIndex++) {
+                if (grid[row][columnIndex] != 0) {
                     allValuesInRow.add(grid[row][columnIndex]);
                     uniqueValuesInRow.add(grid[row][columnIndex]);
 
                 }
             }
             //System.out.println(allValuesInRow.toString());
-            if(allValuesInRow.size() != uniqueValuesInRow.size()){
+            if (allValuesInRow.size() != uniqueValuesInRow.size()) {
                 flag = 1;
             }
             allValuesInRow.clear();
@@ -121,7 +123,7 @@ public class Sudoku {
 
         for (int column = 0; column < grid.length; column++) {
             for (int rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-                if(grid[rowIndex][column] != 0){
+                if (grid[rowIndex][column] != 0) {
                     allValuesInColumn.add(grid[rowIndex][column]);
                     uniqueValuesInColumn.add(grid[rowIndex][column]);
                 }
@@ -155,20 +157,20 @@ public class Sudoku {
         int blockEndRow = gridSqrt;
         int blockEndColumn = gridSqrt;
         int blocksInRow = 0;
-        int previousBlocksInRow =0;
+        int previousBlocksInRow = 0;
 
 
         for (int currentRow = blockStartRow; currentRow >= blockStartRow && currentRow < blockEndRow && currentRow != grid.length; currentRow++) {
             for (int currentColumn = blockStartColumn; currentColumn >= blockStartColumn && currentColumn < blockEndColumn && currentColumn != grid.length; currentColumn++) {
-                if(grid[currentRow][currentColumn] != 0){
+                if (grid[currentRow][currentColumn] != 0) {
                     allValuesInBlock.add(grid[currentRow][currentColumn]);
                     uniqueValuesInBlock.add(grid[currentRow][currentColumn]);
                 }
                 blockArrayIndex++;
                 //System.out.println (currentRow + "," + currentColumn);
 
-                if(blockArrayIndex == grid.length && blockEndColumn <= grid.length){
-                    if(allValuesInBlock.size() != uniqueValuesInBlock.size()){
+                if (blockArrayIndex == grid.length && blockEndColumn <= grid.length) {
+                    if (allValuesInBlock.size() != uniqueValuesInBlock.size()) {
                         flag = 1;
                     }
                     blockStartColumn = currentColumn + 1;
@@ -184,17 +186,17 @@ public class Sudoku {
                 }
 
 
-                if(blocksInRow > previousBlocksInRow && blocksInRow < gridSqrt){
+                if (blocksInRow > previousBlocksInRow && blocksInRow < gridSqrt) {
                     currentRow = blockStartRow;
                     previousBlocksInRow = blocksInRow;
-                } else if(blocksInRow == gridSqrt){
+                } else if (blocksInRow == gridSqrt) {
                     blockStartRow = currentRow + 1;
                     blockStartColumn = 0;
-                   //System.out.println("currentRow: " + currentRow);
-                   //System.out.println("Block start row: " + blockStartRow);
+                    //System.out.println("currentRow: " + currentRow);
+                    //System.out.println("Block start row: " + blockStartRow);
                     blockEndRow += gridSqrt;
                     blockEndColumn = gridSqrt;
-                   // System.out.println("Block end row: " + blockEndRow);
+                    // System.out.println("Block end row: " + blockEndRow);
                     blocksInRow = 0;
                     previousBlocksInRow = 0;
                 }
@@ -202,46 +204,43 @@ public class Sudoku {
 
 
         }
-        if(flag == 1) {
+        if (flag == 1) {
             return false;
-        }
-        else{
+        } else {
             return true;
         }
     }
 
-    private static boolean validBoard(int[][] grid){
-        if(validRows(grid) == true &&
-           validColumns(grid) == true &&
-           validBlocks(grid) == true){
+    private static boolean validBoard(int[][] grid) {
+        if (validRows(grid) == true &&
+                validColumns(grid) == true &&
+                validBlocks(grid) == true) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
 
-    private static boolean validMove(int[][] grid, int row, int column, int number){
+    private static boolean validMove(int[][] grid, int row, int column, int number) {
         int[][] testGrid = Arrays.stream(grid).map(int[]::clone).toArray(int[][]::new);
         testGrid[row][column] = number;
 
-        if(validBoard(testGrid) == true){
+        if (validBoard(testGrid) == true) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
 
-    private static int[][] generateBoard(int[][] grid){
+    private static int[][] generateBoard(int[][] grid) {
         Random random = new Random();
         int gridSqrt = (int) Math.sqrt(grid.length);
         int columnIndex = 0;
         int offsetCounter = 0;
 
-        for(int row = 0; row < grid.length; row++){
+        for (int row = 0; row < grid.length; row++) {
 
-            if(row % gridSqrt == 0 && row != 0){
+            if (row % gridSqrt == 0 && row != 0) {
                 offsetCounter++;
                 columnIndex = 0;
             }
@@ -255,10 +254,10 @@ public class Sudoku {
 
     }
 
-    private static boolean generateBoardComplete(int[][] grid){
+    private static boolean generateBoardComplete(int[][] grid) {
         long genStart = System.currentTimeMillis();
 
-        for(int row = 0; row < grid.length; row++) {
+        for (int row = 0; row < grid.length; row++) {
             for (int column = 0; column < grid.length; column++) {
                 if (grid[row][column] == 0) {
 
@@ -276,13 +275,13 @@ public class Sudoku {
                             grid[row][column] = 0;
                         }
 
-                        if(row != grid.length - 1 && column != grid.length - 1){
+                        if (row != grid.length - 1 && column != grid.length - 1) {
                             long checkTime = System.currentTimeMillis();
                             long genTime = checkTime - genStart;
-                            if(genTime > 7000){
+                            if (genTime > 7000) {
                                 System.out.println("Error generating board, retrying...");
-                                for(int resetRow = 0; resetRow < grid.length; resetRow++){
-                                    for(int resetColumn = 0; resetColumn < grid.length; resetColumn++){
+                                for (int resetRow = 0; resetRow < grid.length; resetRow++) {
+                                    for (int resetColumn = 0; resetColumn < grid.length; resetColumn++) {
                                         grid[resetRow][resetColumn] = 0;
                                     }
                                 }
@@ -306,6 +305,79 @@ public class Sudoku {
 
         }
         return true;
+    }
+
+    static void hideValues(int[][] grid, int amountHidden) {
+        Random hideIndex = new Random();
+        HashSet<Integer> removeFromBlock = new HashSet<>();
+        ArrayList<Integer> allValuesInBlock = new ArrayList<>();
+        HashMap<Integer, Integer> gridLinkRow = new HashMap<>();
+        HashMap<Integer, Integer> gridLinkColumn = new HashMap<>();
+
+
+        int blockStartColumn = 0;
+        int gridSqrt = (int) Math.sqrt(grid.length);
+        int blockStartRow = 0;
+        int blockArrayIndex = 0;
+        int blockEndRow = gridSqrt;
+        int blockEndColumn = gridSqrt;
+        int blocksInRow = 0;
+        int previousBlocksInRow = 0;
+
+        for (int currentRow = blockStartRow; currentRow >= blockStartRow && currentRow < blockEndRow && currentRow != grid.length; currentRow++) {
+            for (int currentColumn = blockStartColumn; currentColumn >= blockStartColumn && currentColumn < blockEndColumn && currentColumn != grid.length; currentColumn++) {
+                if (grid[currentRow][currentColumn] != 0) {
+                    int[] rowCol = {currentRow, currentColumn};
+                    allValuesInBlock.add(grid[currentRow][currentColumn]);
+                    gridLinkRow.put(grid[currentRow][currentColumn], currentRow);
+                    gridLinkColumn.put(grid[currentRow][currentColumn], currentColumn);
+                }
+                blockArrayIndex++;
+                //System.out.println (currentRow + "," + currentColumn);
+
+                if (blockArrayIndex == grid.length && blockEndColumn <= grid.length) {
+                    //System.out.println("Values in block before hiding: " + allValuesInBlock.toString());
+
+                    while (removeFromBlock.size() != amountHidden) {
+                        removeFromBlock.add(hideIndex.nextInt(9));
+                    }
+                    for(int removeIndex : removeFromBlock){
+                        //allValuesInBlock.set(removeIndex, 0);
+                        grid[gridLinkRow.get(allValuesInBlock.get(removeIndex))][gridLinkColumn.get(allValuesInBlock.get(removeIndex))] = 0;
+                    }
+                    //System.out.println("Values in block after hiding: " + allValuesInBlock.toString());
+                    blockStartColumn = currentColumn + 1;
+                    //System.out.println("Block start column: " + blockStartColumn);
+                    blockEndColumn += gridSqrt;
+                    //System.out.println("block end column: " + blockEndColumn);
+                    //System.out.println("block values: " + Arrays.toString(allValuesInBlock));
+                    blockArrayIndex = 0;
+                    //System.out.println("block array index : " + blockArrayIndex);
+                    blocksInRow++;
+                    allValuesInBlock.clear();
+                    removeFromBlock.clear();
+                }
+
+
+                if (blocksInRow > previousBlocksInRow && blocksInRow < gridSqrt) {
+                    currentRow = blockStartRow;
+                    previousBlocksInRow = blocksInRow;
+                } else if (blocksInRow == gridSqrt) {
+                    blockStartRow = currentRow + 1;
+                    blockStartColumn = 0;
+                    //System.out.println("currentRow: " + currentRow);
+                    //System.out.println("Block start row: " + blockStartRow);
+                    blockEndRow += gridSqrt;
+                    blockEndColumn = gridSqrt;
+                    // System.out.println("Block end row: " + blockEndRow);
+                    blocksInRow = 0;
+                    previousBlocksInRow = 0;
+                }
+            }
+
+
+        }
+
     }
 }
 
