@@ -60,27 +60,63 @@ public class Sudoku {
         //int[][] playerBoard = hideValues(sudokuAnswers,3);
         printGrid(playerBoard);
         //System.out.println("fin");
-        System.out.println("Enter the move you would like to make (eg: B6 4)");
-        //while(emptySpace(playerBoard) == true){
+
+        while(emptySpace(playerBoard) == true){
+            System.out.println("Enter the move you would like to make, 'help' for help, or 'quit' to quit");
+            System.out.print("Move: ");
             Scanner inputMove = new Scanner(System.in);
             String move = inputMove.nextLine().toUpperCase();
-            int rowNum = Integer.parseInt(move.substring(1,2));
+            if(move.equalsIgnoreCase("quit")){
+                break;
+            }
+            if(move.equalsIgnoreCase("help")){
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println("------".repeat(10));
+                System.out.println();
+                System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
+                System.out.println("Example: 'B6 4' would place the number four in row 6, in the B column");
+                System.out.println();
+                System.out.println("----Commands" + "-----".repeat(9));
+                System.out.println("quit: \t quits the game");
+                System.out.println("undo: \t undoes the previous move");
+                System.out.println("redo: \t redoes an undone move");
+                System.out.println("------".repeat(10));
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                continue;
+            }
+
+            int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
             int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
-            int inputValue = Integer.parseInt(move.substring(3,4));
+            int inputValue = Character.getNumericValue(move.charAt(3));
             boolean rowInRange = rowNum < playerBoard.length;
             boolean columnInRange = columnNum < playerBoard.length;
             boolean inputInRange = inputValue > 0 && inputValue <= playerBoard.length;
-            System.out.println(inputValue);
             if(Character.isAlphabetic(move.charAt(0)) && columnInRange &&
                     Character.isDigit(move.charAt(1)) && rowInRange &&
                     Character.isSpaceChar(move.charAt(2)) &&
                     Character.isDigit(move.charAt(3)) && inputInRange){
 
+
+                System.out.println();
+                System.out.println();
+                System.out.println("~~~~~~~".repeat(playerBoard.length));
+                System.out.println();
+                System.out.println("| Played move [" + move + "]... |");
+                System.out.println();
                 playerBoard[rowNum][columnNum] = inputValue;
                 printGrid(playerBoard);
-                System.out.println(playerBoard[rowNum][columnNum]);
+                System.out.println("~~~~~~~".repeat(playerBoard.length));
+                System.out.println();
             }
-        //}
+            else{
+                System.out.println("Invalid input. Try again.");
+                System.out.println();
+            }
+        }
 
 
 
@@ -132,14 +168,14 @@ public class Sudoku {
                 }
                 if ((columnNum + 1) % gridSqrt == 0) {
                     if(num == 0){
-                        System.out.print("0");
+                        System.out.print("X");
                     }
                     else{
                         System.out.print(num);
                     }
                 } else {
                     if(num == 0){
-                        System.out.print("0" + "-");
+                        System.out.print("X" + "-");
                     }else{
                         System.out.print(num + "-");
                     }
