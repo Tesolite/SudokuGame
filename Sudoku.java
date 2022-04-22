@@ -70,10 +70,7 @@ public class Sudoku {
                 break;
             }
             if(move.equalsIgnoreCase("help")){
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println("------".repeat(10));
+                System.out.println("\n\n\n" + "------".repeat(10));
                 System.out.println();
                 System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
                 System.out.println("Example: 'B6 4' would place the number four in row 6, in the B column");
@@ -82,10 +79,8 @@ public class Sudoku {
                 System.out.println("quit: \t quits the game");
                 System.out.println("undo: \t undoes the previous move");
                 System.out.println("redo: \t redoes an undone move");
-                System.out.println("------".repeat(10));
-                System.out.println();
-                System.out.println();
-                System.out.println();
+                System.out.println("------".repeat(10) + "\n\n\n");
+                printGrid(playerBoard);
                 continue;
             }
 
@@ -98,23 +93,24 @@ public class Sudoku {
             if(Character.isAlphabetic(move.charAt(0)) && columnInRange &&
                     Character.isDigit(move.charAt(1)) && rowInRange &&
                     Character.isSpaceChar(move.charAt(2)) &&
-                    Character.isDigit(move.charAt(3)) && inputInRange){
-
-
-                System.out.println();
-                System.out.println();
-                System.out.println("~~~~~~~".repeat(playerBoard.length));
-                System.out.println();
-                System.out.println("| Played move [" + move + "]... |");
-                System.out.println();
-                playerBoard[rowNum][columnNum] = inputValue;
-                printGrid(playerBoard);
-                System.out.println("~~~~~~~".repeat(playerBoard.length));
-                System.out.println();
+                    Character.isDigit(move.charAt(3)) && inputInRange &&
+                    move.length() == 4){
+                if(playerBoard[rowNum][columnNum] != 0){
+                    System.out.println("\n------------------------------");
+                    System.out.println("ERROR: Space already occupied.");
+                    System.out.println("------------------------------\n");
+                }else {
+                    System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
+                    System.out.println("\n| Played move [" + move + "]... |\n");
+                    playerBoard[rowNum][columnNum] = inputValue;
+                    printGrid(playerBoard);
+                    System.out.println("~~~~~~~".repeat(playerBoard.length) + "\n");
+                }
             }
             else{
-                System.out.println("Invalid input. Try again.");
-                System.out.println();
+                System.out.println("\n--------------------------------");
+                System.out.println("ERROR: Invalid input. Try again.");
+                System.out.println("--------------------------------\n");
             }
         }
 
