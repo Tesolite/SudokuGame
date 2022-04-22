@@ -3,122 +3,203 @@ import java.util.*;
 public class Sudoku {
 
     public static void main(String[] args) {
-        int[][] sudokuAnswers = makeGrid(9);
+
+        int exitFlag = 0;
+        int[][] savedBoard = null;
+        int[][] savedOriginalBoard = null;
         //  System.out.println(Arrays.toString(sudoku[2]));
         //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
         //printGrid(sudoku);
 
         //GAME PRESENTED TO USER WILL HAVE 3 VALUES REMOVED FROM EACH BLOCK
+        while (exitFlag != 1) {
 
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println("Generating Board...");
-        generateBoard(sudokuAnswers);
-        generateBoardComplete(sudokuAnswers);
-        System.out.println("Generation complete");
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println();
-        System.out.println();
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println("Checking generated board... ");
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println("Rows valid: " + validRows(sudokuAnswers));
-        System.out.println("Columns valid: " + validColumns(sudokuAnswers));
-        System.out.println("Blocks valid: " + validBlocks(sudokuAnswers));
-        System.out.println("Board valid: " + validBoard(sudokuAnswers));
-        System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudokuAnswers, 0, 1, 1));
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println("Choose your difficulty: \t [E]asy \t [M]edium \t [H]ard \t");
-        System.out.println("----------------------------------------------------------------------------------");
-        System.out.println();
-
-        int[][] playerBoard = sudokuAnswers;
-        boolean validAnswer;
-        do {
-            validAnswer = true;
-            Scanner inputDifficulty = new Scanner(System.in);
-            System.out.print("Response: ");
-            String difficulty = inputDifficulty.nextLine();
-            System.out.println("Program received: " + difficulty);
+            int[][] sudokuAnswers = makeGrid(9);
+            if(savedBoard != null){
+                System.out.println("------------------------------------------------------------------------------------------------");
+                System.out.println("You have a saved game in progress. Continue? [y]/[n]");
+                System.out.println("------------------------------------------------------------------------------------------------");
+            }else {
+            System.out.println("----------------------------------------------------------------------------------");
+            System.out.println("Generating Board...");
+            generateBoard(sudokuAnswers);
+            generateBoardComplete(sudokuAnswers);
+            System.out.println("Auto-generated board:");
+            printGrid(sudokuAnswers);
+            int[] seed = getBoardSeed(sudokuAnswers);
+            int[][] seedBoard = generateSeed(seed);
+            System.out.println("Seed board:");
+            printGrid(seedBoard);
+            System.out.println("Generation complete");
+            System.out.println("----------------------------------------------------------------------------------");
             System.out.println();
-            if (difficulty.equalsIgnoreCase("e")) {
-                playerBoard = hideValues(sudokuAnswers, 3);
-            } else if (difficulty.equalsIgnoreCase("m")) {
-                playerBoard = hideValues(sudokuAnswers, 4);
-            } else if (difficulty.equalsIgnoreCase("h")) {
-                playerBoard = hideValues(sudokuAnswers, 5);
-            } else {
-                System.out.println("Invalid answer. Please only enter the character in the brackets to make your choice.");
-                validAnswer = false;
-            }
-        } while (validAnswer == false);
+            System.out.println();
+            System.out.println("----------------------------------------------------------------------------------");
+            System.out.println("Checking generated board... ");
+            System.out.println("----------------------------------------------------------------------------------");
+            System.out.println("Rows valid: " + validRows(sudokuAnswers));
+            System.out.println("Columns valid: " + validColumns(sudokuAnswers));
+            System.out.println("Blocks valid: " + validBlocks(sudokuAnswers));
+            System.out.println("Board valid: " + validBoard(sudokuAnswers));
 
-
-        //printGrid(sudokuAnswers);
-
-        //printGrid(sudoku);
-        //int[][] playerBoard = hideValues(sudokuAnswers,3);
-        printGrid(playerBoard);
-        //System.out.println("fin");
-
-        while(emptySpace(playerBoard) == true){
-            System.out.println("Enter the move you would like to make, 'help' for help, or 'quit' to quit");
-            System.out.print("Move: ");
-            Scanner inputMove = new Scanner(System.in);
-            String move = inputMove.nextLine().toUpperCase();
-            if(move.equalsIgnoreCase("quit")){
-                break;
-            }
-            if(move.equalsIgnoreCase("help")){
-                System.out.println("\n\n\n" + "------".repeat(10));
+                System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudokuAnswers, 0, 1, 1));
+                System.out.println("------------------------------------------------------------------------------------------------");
+                System.out.println("Choose your difficulty: \t [E]asy \t [M]edium \t [H]ard \t \t [Exit]");
+                System.out.println("------------------------------------------------------------------------------------------------");
                 System.out.println();
-                System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
-                System.out.println("Example: 'B6 4' would place the number four in row 6, in the B column");
-                System.out.println();
-                System.out.println("----Commands" + "-----".repeat(9));
-                System.out.println("quit: \t quits the game");
-                System.out.println("undo: \t undoes the previous move");
-                System.out.println("redo: \t redoes an undone move");
-                System.out.println("------".repeat(10) + "\n\n\n");
-                printGrid(playerBoard);
-                continue;
             }
 
-            int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
-            int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
-            int inputValue = Character.getNumericValue(move.charAt(3));
-            boolean rowInRange = rowNum < playerBoard.length;
-            boolean columnInRange = columnNum < playerBoard.length;
-            boolean inputInRange = inputValue > 0 && inputValue <= playerBoard.length;
-            if(Character.isAlphabetic(move.charAt(0)) && columnInRange &&
-                    Character.isDigit(move.charAt(1)) && rowInRange &&
-                    Character.isSpaceChar(move.charAt(2)) &&
-                    Character.isDigit(move.charAt(3)) && inputInRange &&
-                    move.length() == 4){
-                if(playerBoard[rowNum][columnNum] != 0){
-                    System.out.println("\n------------------------------");
-                    System.out.println("ERROR: Space already occupied.");
-                    System.out.println("------------------------------\n");
-                }else {
-                    System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
-                    System.out.println("\n| Played move [" + move + "]... |\n");
-                    playerBoard[rowNum][columnNum] = inputValue;
+            int[][] playerBoard = Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new);
+            int[][] originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+
+
+            boolean validAnswer;
+            boolean continueGame = true;
+            do {
+                /*if(savedBoard != null) {
+                    boolean validContinueResponse = true;
+                    do {
+                        Scanner continueSavedResponse = new Scanner(System.in);
+                        String inputContinueSaved = continueSavedResponse.nextLine();
+                        System.out.print("Response: ");
+                        if (inputContinueSaved.equals("y")) {
+                            playerBoard = Arrays.stream(savedBoard).map(int[]::clone).toArray(int[][]::new);
+                            originalBoard = Arrays.stream(savedOriginalBoard).map(int[]::clone).toArray(int[][]::new);
+                        } else if (inputContinueSaved.equals("n") == false) {
+                            validContinueResponse = false;
+                            System.out.println("Invalid response, please try again.");
+                        }
+                    } while (validContinueResponse == false);
+
+
+                }
+            */
+                validAnswer = true;
+                Scanner inputDifficulty = new Scanner(System.in);
+                System.out.print("Response: ");
+                String difficulty = inputDifficulty.nextLine();
+                System.out.println("Program received: " + difficulty);
+                System.out.println();
+                if(savedBoard != null && difficulty.equalsIgnoreCase("y")){
+                    playerBoard = Arrays.stream(savedBoard).map(int[]::clone).toArray(int[][]::new);
+                    originalBoard = Arrays.stream(savedOriginalBoard).map(int[]::clone).toArray(int[][]::new);
                     printGrid(playerBoard);
-                    System.out.println("~~~~~~~".repeat(playerBoard.length) + "\n");
+                }
+                else if(savedBoard != null && difficulty.equalsIgnoreCase("n")){
+                    continueGame = false;
+                    savedBoard = null;
+                    savedOriginalBoard = null;
+                    break;
+
+                }
+                else if(difficulty.equalsIgnoreCase("exit")){
+                    exitFlag = 1;
+                    System.out.println("Goodbye!");
+                    System.exit(0);
+                }
+                else if (difficulty.equalsIgnoreCase("e")) {
+                    playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 3);
+                    originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    printGrid(playerBoard);
+                } else if (difficulty.equalsIgnoreCase("m")) {
+                    playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 4);
+                    originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    printGrid(playerBoard);
+                } else if (difficulty.equalsIgnoreCase("h")) {
+                    playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 5);
+                    originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    printGrid(playerBoard);
+                } else {
+                    System.out.println("Invalid answer. Please only enter the character in the brackets to make your choice.");
+                    validAnswer = false;
+                }
+            } while (validAnswer == false);
+
+
+            //printGrid(sudokuAnswers);
+
+            //printGrid(sudoku);
+            //System.out.println("fin");
+
+            while (continueGame == true) {
+                System.out.println("Enter the move you would like to make, 'help' for help, or 'quit' to quit");
+                System.out.print("Move: ");
+                Scanner inputMove = new Scanner(System.in);
+                String move = inputMove.nextLine().toUpperCase();
+                if (move.equalsIgnoreCase("quit")) {
+                    System.out.println("Would you like to save your game? [y]/[n]");
+                    System.out.print("Response: ");
+                    boolean validateSaveResponse = true;
+                    do {
+                        move = inputMove.nextLine();
+                        validateSaveResponse = true;
+                        if (move.equals("y")) {
+                            savedBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                            savedOriginalBoard = Arrays.stream(originalBoard).map(int[]::clone).toArray(int[][]::new);
+                        } else if (move.equals("n")) {
+                            savedBoard = null;
+                            savedOriginalBoard = null;
+                        }else{
+                            System.out.println("Invalid input. Please enter your input again");
+                            validateSaveResponse = false;
+                        }
+                    } while(validateSaveResponse == false);
+                    break;
+                }
+                if (move.equalsIgnoreCase("help")) {
+                    System.out.println("\n\n\n" + "------".repeat(10));
+                    System.out.println();
+                    System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
+                    System.out.println("Example: 'B6 4' would place the number four in row 6, in the B column");
+                    System.out.println();
+                    System.out.println("----Commands" + "-----".repeat(9));
+                    System.out.println("quit: \t quits the game, counts as a loss");
+                    System.out.println("undo: \t undoes the previous move");
+                    System.out.println("redo: \t redoes an undone move");
+                    System.out.println("------".repeat(10) + "\n\n\n");
+                    printGrid(playerBoard);
+                    continue;
+                }
+
+                int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
+                int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
+                int inputValue = Character.getNumericValue(move.charAt(3));
+                boolean rowInRange = rowNum < playerBoard.length;
+                boolean columnInRange = columnNum < playerBoard.length;
+                boolean inputInRange = inputValue > 0 && inputValue <= playerBoard.length;
+                if (Character.isAlphabetic(move.charAt(0)) && columnInRange &&
+                        Character.isDigit(move.charAt(1)) && rowInRange &&
+                        Character.isSpaceChar(move.charAt(2)) &&
+                        Character.isDigit(move.charAt(3)) && inputInRange &&
+                        move.length() == 4) {
+                    if (originalBoard[rowNum][columnNum] != 0) {
+                        System.out.println("\n-----------------------------------------------");
+                        System.out.println("ERROR: Cannot change values of pre-set squares.");
+                        System.out.println("-----------------------------------------------\n");
+                    } else {
+                        System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
+                        System.out.println("\n| Played move [" + move + "]... |\n");
+                        playerBoard[rowNum][columnNum] = inputValue;
+                        printGrid(playerBoard);
+                        System.out.println("~~~~~~~".repeat(playerBoard.length) + "\n");
+                    }
+                } else {
+                    System.out.println("\n--------------------------------");
+                    System.out.println("ERROR: Invalid input. Try again.");
+                    System.out.println("--------------------------------\n");
+                }
+                if(emptySpace(playerBoard) == false && validBoard(playerBoard)){
+                    System.out.println("CONGRATULATIONS! You have successfully solved the sudoku board.");
+                    continueGame = false;
+                    break;
                 }
             }
-            else{
-                System.out.println("\n--------------------------------");
-                System.out.println("ERROR: Invalid input. Try again.");
-                System.out.println("--------------------------------\n");
-            }
+
+
+            System.out.println(validBoard(playerBoard));
+            System.out.println(playerBoard[0][1]);
         }
-
-
-
-
-        System.out.println(validBoard(playerBoard));
-        System.out.println(playerBoard[0][1]);
     }
 
 
@@ -330,7 +411,7 @@ public class Sudoku {
         }
     }
 
-    private static int[][] generateBoard(int[][] grid) {
+    private static void generateBoard(int[][] grid) {
         Random random = new Random();
         int gridSqrt = (int) Math.sqrt(grid.length);
         int columnIndex = 0;
@@ -348,9 +429,32 @@ public class Sudoku {
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
         }
-        return grid;
-
     }
+
+
+    private static int[] getBoardSeed(int[][] grid){
+        int gridSqrt = (int) Math.sqrt(grid.length);
+        int[] seed = new int[grid.length];
+        int seedIndex = 0;
+        int columnIndex = 0;
+        int offsetCounter = 0;
+
+        for (int row = 0; row < grid.length; row++) {
+
+            if (row % gridSqrt == 0 && row != 0) {
+                offsetCounter++;
+                columnIndex = 0;
+            }
+            int currentColumn = offsetCounter + columnIndex;
+
+            seed[seedIndex] = grid[row][currentColumn];
+            seedIndex++;
+            //System.out.println("grid[" + row + "][" + currentColumn + "]");
+            columnIndex += gridSqrt;
+        }
+        return seed;
+    }
+
 
     private static boolean generateBoardComplete(int[][] grid) {
         long genStart = System.currentTimeMillis();
@@ -383,7 +487,7 @@ public class Sudoku {
                                         grid[resetRow][resetColumn] = 0;
                                     }
                                 }
-                                grid = generateBoard(grid);
+                                generateBoard(grid);
                                 generateBoardComplete(grid);
                                 row = 0;
                                 column = 0;
@@ -403,6 +507,30 @@ public class Sudoku {
 
         }
         return true;
+    }
+
+    private static int[][] generateSeed(int[] seed){
+        int[][] grid = makeGrid(seed.length);
+        int gridSqrt = (int) Math.sqrt(grid.length);
+        int seedIndex = 0;
+        int columnIndex = 0;
+        int offsetCounter = 0;
+
+        for (int row = 0; row < grid.length; row++) {
+
+            if (row % gridSqrt == 0 && row != 0) {
+                offsetCounter++;
+                columnIndex = 0;
+            }
+            int currentColumn = offsetCounter + columnIndex;
+
+            grid[row][currentColumn] = seed[seedIndex];
+            seedIndex++;
+            //System.out.println("grid[" + row + "][" + currentColumn + "]");
+            columnIndex += gridSqrt;
+        }
+        generateBoardComplete(grid);
+        return grid;
     }
 
     static int[][] hideValues(int[][] grid, int amountHidden) {
