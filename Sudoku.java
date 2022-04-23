@@ -58,7 +58,8 @@ public class Sudoku {
             boolean moveIsRedo = false;
             String redoRowColumn = "";
             int redoValue = 0;
-            boolean saveRedoValue = false;
+            int redoRow = 0;
+            int redoColumn = 0;
 
 
             boolean validAnswer;
@@ -190,18 +191,14 @@ public class Sudoku {
 
                 else if(move.equalsIgnoreCase("undo")){
                     if(undo.empty() == false){
-                        saveRedoValue = true;
-                        if(saveRedoValue == true) {
-                            redo.push(redoRowColumn + redoValue);
+                        moveIsUndo = true;
+                        if(moveIsUndo){
+
                         }
-                        System.out.println("Saved redo move: " + redoRowColumn + String.valueOf(redoValue));
                         move = undo.pop();
                         System.out.println("Undoing move: " + move);
-                        redoRowColumn = move.substring(0, 3);
-                        redoValue = Character.getNumericValue(move.charAt(3));
                         System.out.println( "Move to make: " + move);
-                        moveIsUndo = true;
-                        //redo.push(move);
+
                     }
                     else{
                         System.out.println("\nNo moves left to undo.\n");
@@ -211,6 +208,7 @@ public class Sudoku {
                 else if(move.equalsIgnoreCase("redo")){
                     if(redo.empty() == false) {
                         move = redo.pop();
+                        System.out.println("Redo move: " + move);
                         moveIsRedo = true;
                     }
                     else{
@@ -245,24 +243,29 @@ public class Sudoku {
                         System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
                         System.out.println("\n| Played move [" + move + "]... |\n");
 
-                        if(moveIsRedo == false && moveIsUndo == false){
+
+
+                        if(moveIsUndo == true && moveIsRedo == false) {
+                            redo.push(move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum]));
+                            System.out.println("Saved move " + (move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum])) + " in redo");
+                            System.out.println("Redo size now: " + redo.size());
+                        }
+                        else if (moveIsRedo != true){
                             redo.clear();
                         }
-                        else{
-                            moveIsRedo = false;
-                        }
+
+
                         if(moveIsUndo == false) {
                             System.out.println("move saved in undo");
+                            redoValue = playerBoard[rowNum][columnNum];
                             undo.push(move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum]));
-                        } else {
-                            moveIsUndo = false;
                         }
 
                         playerBoard[rowNum][columnNum] = inputValue;
                         printGrid(playerBoard);
-                        redoRowColumn = move.substring(0, 3);
-                        redoValue = inputValue;
                         System.out.println("~~~~~~~".repeat(playerBoard.length) + "\n");
+                        moveIsRedo = false;
+                        moveIsUndo = false;
                     }
                 } else {
                     System.out.println("\n--------------------------------");
@@ -284,6 +287,13 @@ public class Sudoku {
             System.out.println(playerBoard[0][1]);
         }
     }
+
+
+
+
+
+
+
 
 
     static int[][] makeGrid(int size) {
