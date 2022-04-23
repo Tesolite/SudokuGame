@@ -52,6 +52,13 @@ public class Sudoku {
 
             int[][] playerBoard = Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new);
             int[][] originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+            Stack<String> undo = new Stack<>();
+            boolean moveIsUndo = false;
+            Stack<String> redo = new Stack<>();
+            boolean moveIsRedo = false;
+            String redoRowColumn = "";
+            int redoValue = 0;
+            boolean saveRedoValue = false;
 
 
             boolean validAnswer;
@@ -123,15 +130,15 @@ public class Sudoku {
             //System.out.println("fin");
 
             while (continueGame == true) {
-                System.out.println("Enter the move you would like to make, 'help' for help, or 'quit' to quit");
+                System.out.println("Enter the move you would like to make, 'help' for a list of commands, or 'quit' to quit this puzzle");
                 System.out.print("Move: ");
                 Scanner inputMove = new Scanner(System.in);
                 String move = inputMove.nextLine().toUpperCase();
                 if (move.equalsIgnoreCase("quit")) {
                     System.out.println("Would you like to save your game? [y]/[n]");
-                    System.out.print("Response: ");
                     boolean validateSaveResponse = true;
                     do {
+                        System.out.print("Response: ");
                         move = inputMove.nextLine();
                         validateSaveResponse = true;
                         if (move.equals("y")) {
@@ -140,6 +147,25 @@ public class Sudoku {
                         } else if (move.equals("n")) {
                             savedBoard = null;
                             savedOriginalBoard = null;
+                            System.out.println("======================================================");
+                            System.out.println("GAME OVER. Would you like to start a new game? [y]/[n]");
+                            System.out.println("======================================================");
+                            boolean newGameResponseValid = true;
+                            do{
+                                System.out.print("Response: ");
+                                move = inputMove.nextLine();
+                                if(move.equalsIgnoreCase("y")){
+                                    break;
+                                }
+                                else if(move.equalsIgnoreCase("n")){
+                                    exitFlag = 1;
+                                    System.out.println("Thank you for playing, goodbye!");
+                                }
+                                else{
+                                    System.out.println("Invalid input. Please enter your input again.");
+                                    newGameResponseValid = false;
+                                }
+                            }while(newGameResponseValid == false);
                         }else{
                             System.out.println("Invalid input. Please enter your input again");
                             validateSaveResponse = false;
@@ -147,7 +173,7 @@ public class Sudoku {
                     } while(validateSaveResponse == false);
                     break;
                 }
-                if (move.equalsIgnoreCase("help")) {
+                else if (move.equalsIgnoreCase("help")) {
                     System.out.println("\n\n\n" + "------".repeat(10));
                     System.out.println();
                     System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
@@ -162,16 +188,54 @@ public class Sudoku {
                     continue;
                 }
 
+                else if(move.equalsIgnoreCase("undo")){
+                    if(undo.empty() == false){
+                        saveRedoValue = true;
+                        if(saveRedoValue == true) {
+                            redo.push(redoRowColumn + redoValue);
+                        }
+                        System.out.println("Saved redo move: " + redoRowColumn + String.valueOf(redoValue));
+                        move = undo.pop();
+                        System.out.println("Undoing move: " + move);
+                        redoRowColumn = move.substring(0, 3);
+                        redoValue = Character.getNumericValue(move.charAt(3));
+                        System.out.println( "Move to make: " + move);
+                        moveIsUndo = true;
+                        //redo.push(move);
+                    }
+                    else{
+                        System.out.println("\nNo moves left to undo.\n");
+                        continue;
+                    }
+                }
+                else if(move.equalsIgnoreCase("redo")){
+                    if(redo.empty() == false) {
+                        move = redo.pop();
+                        moveIsRedo = true;
+                    }
+                    else{
+                        System.out.println("\nNo moves left to redo.\n");
+                        continue;
+                    }
+                }
+                else if(move.length() < 4){
+                    System.out.println("\n--------------------------------");
+                    System.out.println("ERROR: Invalid input. Try again.");
+                    System.out.println("--------------------------------\n");
+                    continue;
+                }
+
                 int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
                 int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
                 int inputValue = Character.getNumericValue(move.charAt(3));
                 boolean rowInRange = rowNum < playerBoard.length;
                 boolean columnInRange = columnNum < playerBoard.length;
-                boolean inputInRange = inputValue > 0 && inputValue <= playerBoard.length;
+                boolean inputInRange = inputValue >= 0 && inputValue <= playerBoard.length;
+
                 if (Character.isAlphabetic(move.charAt(0)) && columnInRange &&
                         Character.isDigit(move.charAt(1)) && rowInRange &&
                         Character.isSpaceChar(move.charAt(2)) &&
-                        Character.isDigit(move.charAt(3)) && inputInRange &&
+                        (Character.isDigit(move.charAt(3))) && inputInRange &&
                         move.length() == 4) {
                     if (originalBoard[rowNum][columnNum] != 0) {
                         System.out.println("\n-----------------------------------------------");
@@ -180,8 +244,24 @@ public class Sudoku {
                     } else {
                         System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
                         System.out.println("\n| Played move [" + move + "]... |\n");
+
+                        if(moveIsRedo == false && moveIsUndo == false){
+                            redo.clear();
+                        }
+                        else{
+                            moveIsRedo = false;
+                        }
+                        if(moveIsUndo == false) {
+                            System.out.println("move saved in undo");
+                            undo.push(move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum]));
+                        } else {
+                            moveIsUndo = false;
+                        }
+
                         playerBoard[rowNum][columnNum] = inputValue;
                         printGrid(playerBoard);
+                        redoRowColumn = move.substring(0, 3);
+                        redoValue = inputValue;
                         System.out.println("~~~~~~~".repeat(playerBoard.length) + "\n");
                     }
                 } else {
@@ -190,8 +270,11 @@ public class Sudoku {
                     System.out.println("--------------------------------\n");
                 }
                 if(emptySpace(playerBoard) == false && validBoard(playerBoard)){
+                    System.out.println("===============================================================");
                     System.out.println("CONGRATULATIONS! You have successfully solved the sudoku board.");
+                    System.out.println("===============================================================");
                     continueGame = false;
+                    inputMove.close();
                     break;
                 }
             }
