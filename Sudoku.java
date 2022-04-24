@@ -2,11 +2,15 @@ import java.util.*;
 
 public class Sudoku {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         int exitFlag = 0;
         int[][] savedBoard = null;
         int[][] savedOriginalBoard = null;
+        int savedGamesCount = 0;
+        int[][] gameReplays = new int[9][];
+        String[][] gameReplaysRewatch = new String[9][];
+
         //  System.out.println(Arrays.toString(sudoku[2]));
         //sudoku[0][0] = 1;
         //sudoku[0][2] = 1;
@@ -14,40 +18,41 @@ public class Sudoku {
 
         //GAME PRESENTED TO USER WILL HAVE 3 VALUES REMOVED FROM EACH BLOCK
         while (exitFlag != 1) {
-
             int[][] sudokuAnswers = makeGrid(9);
-            if(savedBoard != null){
+            if (savedBoard != null) {
                 System.out.println("------------------------------------------------------------------------------------------------");
                 System.out.println("You have a saved game in progress. Continue? [y]/[n]");
                 System.out.println("------------------------------------------------------------------------------------------------");
-            }else {
-            System.out.println("----------------------------------------------------------------------------------");
-            System.out.println("Generating Board...");
-            generateBoard(sudokuAnswers);
-            generateBoardComplete(sudokuAnswers);
-            System.out.println("Auto-generated board:");
-            printGrid(sudokuAnswers);
-            int[] seed = getBoardSeed(sudokuAnswers);
-            int[][] seedBoard = generateSeed(seed);
-            System.out.println("Seed board:");
-            printGrid(seedBoard);
-            System.out.println("Generation complete");
-            System.out.println("----------------------------------------------------------------------------------");
-            System.out.println();
-            System.out.println();
-            System.out.println("----------------------------------------------------------------------------------");
-            System.out.println("Checking generated board... ");
-            System.out.println("----------------------------------------------------------------------------------");
-            System.out.println("Rows valid: " + validRows(sudokuAnswers));
-            System.out.println("Columns valid: " + validColumns(sudokuAnswers));
-            System.out.println("Blocks valid: " + validBlocks(sudokuAnswers));
-            System.out.println("Board valid: " + validBoard(sudokuAnswers));
+            } else {
+                System.out.println("----------------------------------------------------------------------------------");
+                System.out.println("Generating Board...");
+                generateBoard(sudokuAnswers);
+                generateBoardComplete(sudokuAnswers);
+                System.out.println("Auto-generated board:");
+                printGrid(sudokuAnswers);
+                int[] seed = getBoardSeed(sudokuAnswers);
+                int[][] seedBoard = generateSeed(seed);
+                System.out.println("Seed board:");
+                printGrid(seedBoard);
+                System.out.println("Generation complete");
+                System.out.println("----------------------------------------------------------------------------------\n\n");
+                System.out.println("----------------------------------------------------------------------------------");
+                System.out.println("Checking generated board... ");
+                System.out.println("----------------------------------------------------------------------------------");
+                System.out.println("Rows valid: " + validRows(sudokuAnswers));
+                System.out.println("Columns valid: " + validColumns(sudokuAnswers));
+                System.out.println("Blocks valid: " + validBlocks(sudokuAnswers));
+                System.out.println("Board valid: " + validBoard(sudokuAnswers));
 
                 System.out.println("Valid to add 1 to 2nd column in first row: " + validMove(sudokuAnswers, 0, 1, 1));
                 System.out.println("------------------------------------------------------------------------------------------------");
                 System.out.println("Choose your difficulty: \t [E]asy \t [M]edium \t [H]ard \t \t [Exit]");
-                System.out.println("------------------------------------------------------------------------------------------------");
-                System.out.println();
+                System.out.println("------------------------------------------------------------------------------------------------\n");
+                if (savedGamesCount > 0) {
+                    System.out.println("======================================");
+                    System.out.println("You have " + savedGamesCount + " games saved.   [view]");
+                    System.out.println("======================================\n");
+                }
             }
 
             int[][] playerBoard = Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new);
@@ -56,10 +61,7 @@ public class Sudoku {
             boolean moveIsUndo = false;
             Stack<String> redo = new Stack<>();
             boolean moveIsRedo = false;
-            String redoRowColumn = "";
-            int redoValue = 0;
-            int redoRow = 0;
-            int redoColumn = 0;
+            ArrayList<String> allMoves = new ArrayList<>();
 
 
             boolean validAnswer;
@@ -89,40 +91,114 @@ public class Sudoku {
                 String difficulty = inputDifficulty.nextLine();
                 System.out.println("Program received: " + difficulty);
                 System.out.println();
-                if(savedBoard != null && difficulty.equalsIgnoreCase("y")){
+                if (savedBoard != null && difficulty.equalsIgnoreCase("y")) {
                     playerBoard = Arrays.stream(savedBoard).map(int[]::clone).toArray(int[][]::new);
                     originalBoard = Arrays.stream(savedOriginalBoard).map(int[]::clone).toArray(int[][]::new);
                     printGrid(playerBoard);
-                }
-                else if(savedBoard != null && difficulty.equalsIgnoreCase("n")){
+                } else if (savedBoard != null && difficulty.equalsIgnoreCase("n")) {
                     continueGame = false;
                     savedBoard = null;
                     savedOriginalBoard = null;
                     break;
 
                 }
-                else if(difficulty.equalsIgnoreCase("exit")){
+
+
+                if (difficulty.equalsIgnoreCase("view")){
+                    System.out.println("===========================");
+                    for(int i = 0; i < 9; i++){
+                        if(gameReplaysRewatch[i] != null){
+                            System.out.println("Save slot #[" + (i + 1) + "]");
+                        }
+                    }
+                    System.out.println("\nPlease enter the number of the save slot you wish to access, or [q] to exit");
+                    System.out.println("===========================================================================");
+                    Scanner replaySelectScan = new Scanner(System.in);
+                    boolean validSelection = true;
+                    do{
+                        System.out.print("Selection: ");
+                        String replaySelect = replaySelectScan.nextLine();
+                        if(replaySelect.equalsIgnoreCase("q")){
+                            break;
+                        }
+                        else if(Character.isDigit(replaySelect.charAt(0)) && replaySelect.length() == 1) {
+                            int saveSlot = Integer.parseInt(replaySelect) - 1;
+                            if (gameReplaysRewatch[saveSlot] != null) {
+                                System.out.println("Select whether you want to [replay] or [rewatch]");
+                                boolean validChoice = true;
+                                do {
+                                    System.out.print("Choice: ");
+                                    replaySelect = replaySelectScan.nextLine();
+                                    if(replaySelect.equalsIgnoreCase("replay")) {
+                                        playerBoard = Arrays.stream(generateSeed(gameReplays[saveSlot])).map(int[]::clone).toArray(int[][]::new);
+                                        originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                                        System.out.println("Choose your difficulty this time around: [E]asy     [M]edium     [H]ard");
+                                        boolean validReplayDifficulty = true;
+                                        do{
+                                            validReplayDifficulty = true;
+                                            System.out.print("Difficulty: ");
+                                            replaySelect = replaySelectScan.nextLine();
+                                            if(replaySelect.equalsIgnoreCase("e") || replaySelect.equalsIgnoreCase("m") || replaySelect.equalsIgnoreCase("h")){
+                                                difficulty = replaySelect;
+                                            }else{
+                                                validReplayDifficulty = false;
+                                                System.out.println("Invalid difficulty. Try again");
+                                            }
+                                        }while(validReplayDifficulty == false);
+
+                                    }else if(replaySelect.equalsIgnoreCase("rewatch")){
+                                        rewatchGame(gameReplaysRewatch, saveSlot);
+                                        break;
+
+                                    }else{
+                                        validChoice = false;
+                                        System.out.println("Invalid choice. Try again.");
+                                    }
+                                } while (validChoice == false);
+                            } else {
+                                System.out.println("Invalid selection. Try again.");
+                                validSelection = false;
+                            }
+                        }
+                    }while(validSelection == false);
+                    break;
+
+                }
+                if (difficulty.equalsIgnoreCase("exit")) {
                     exitFlag = 1;
                     System.out.println("Goodbye!");
                     System.exit(0);
-                }
-                else if (difficulty.equalsIgnoreCase("e")) {
+                } else if (difficulty.equalsIgnoreCase("e")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 3);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    System.out.println("\n\n");
                     printGrid(playerBoard);
                 } else if (difficulty.equalsIgnoreCase("m")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 4);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    System.out.println("\n\n");
                     printGrid(playerBoard);
                 } else if (difficulty.equalsIgnoreCase("h")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 5);
+                    originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    System.out.println("\n\n");
+                    printGrid(playerBoard);
+                } else if (difficulty.equalsIgnoreCase("babyMode")) {
+                    playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 1);
+                    originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                    printGrid(playerBoard);
+                } else if (difficulty.equalsIgnoreCase("veryVeryCleverr")) {
+                    playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 0);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
                     printGrid(playerBoard);
                 } else {
                     System.out.println("Invalid answer. Please only enter the character in the brackets to make your choice.");
                     validAnswer = false;
                 }
+
             } while (validAnswer == false);
+            int[] boardSeed = getSeedExperimental(playerBoard);
+            System.out.println("The seed for this board is: " + Arrays.toString(boardSeed));
 
 
             //printGrid(sudokuAnswers);
@@ -149,32 +225,29 @@ public class Sudoku {
                             savedBoard = null;
                             savedOriginalBoard = null;
                             System.out.println("======================================================");
-                            System.out.println("GAME OVER. Would you like to start a new game? [y]/[n]");
+                            System.out.println("GAME OVER. Would you like to return to menu? [y]/[n]");
                             System.out.println("======================================================");
                             boolean newGameResponseValid = true;
-                            do{
+                            do {
                                 System.out.print("Response: ");
                                 move = inputMove.nextLine();
-                                if(move.equalsIgnoreCase("y")){
+                                if (move.equalsIgnoreCase("y")) {
                                     break;
-                                }
-                                else if(move.equalsIgnoreCase("n")){
+                                } else if (move.equalsIgnoreCase("n")) {
                                     exitFlag = 1;
                                     System.out.println("Thank you for playing, goodbye!");
-                                }
-                                else{
+                                } else {
                                     System.out.println("Invalid input. Please enter your input again.");
                                     newGameResponseValid = false;
                                 }
-                            }while(newGameResponseValid == false);
-                        }else{
+                            } while (newGameResponseValid == false);
+                        } else {
                             System.out.println("Invalid input. Please enter your input again");
                             validateSaveResponse = false;
                         }
-                    } while(validateSaveResponse == false);
+                    } while (validateSaveResponse == false);
                     break;
-                }
-                else if (move.equalsIgnoreCase("help")) {
+                } else if (move.equalsIgnoreCase("help")) {
                     System.out.println("\n\n\n" + "------".repeat(10));
                     System.out.println();
                     System.out.println("TUTORIAL:To make a move, first write the column letter and then row number, followed by the value you wish to enter. ");
@@ -187,44 +260,38 @@ public class Sudoku {
                     System.out.println("------".repeat(10) + "\n\n\n");
                     printGrid(playerBoard);
                     continue;
-                }
-
-                else if(move.equalsIgnoreCase("undo")){
-                    if(undo.empty() == false){
+                } else if (move.equalsIgnoreCase("undo")) {
+                    if (undo.empty() == false) {
                         moveIsUndo = true;
-                        if(moveIsUndo){
+                        if (moveIsUndo) {
 
                         }
                         move = undo.pop();
                         System.out.println("Undoing move: " + move);
-                        System.out.println( "Move to make: " + move);
+                        System.out.println("Move to make: " + move);
 
-                    }
-                    else{
+                    } else {
                         System.out.println("\nNo moves left to undo.\n");
                         continue;
                     }
-                }
-                else if(move.equalsIgnoreCase("redo")){
-                    if(redo.empty() == false) {
+                } else if (move.equalsIgnoreCase("redo")) {
+                    if (redo.empty() == false) {
                         move = redo.pop();
                         System.out.println("Redo move: " + move);
                         moveIsRedo = true;
-                    }
-                    else{
+                    } else {
                         System.out.println("\nNo moves left to redo.\n");
                         continue;
                     }
-                }
-                else if(move.length() < 4){
+                } else if (move.length() < 4) {
                     System.out.println("\n--------------------------------");
                     System.out.println("ERROR: Invalid input. Try again.");
                     System.out.println("--------------------------------\n");
                     continue;
                 }
 
-                int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
                 int columnNum = Character.getNumericValue(move.charAt(0)) - 10;
+                int rowNum = Character.getNumericValue(move.charAt(1)) - 1;
                 int inputValue = Character.getNumericValue(move.charAt(3));
                 boolean rowInRange = rowNum < playerBoard.length;
                 boolean columnInRange = columnNum < playerBoard.length;
@@ -242,22 +309,20 @@ public class Sudoku {
                     } else {
                         System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
                         System.out.println("\n| Played move [" + move + "]... |\n");
+                        allMoves.add(move);
 
 
-
-                        if(moveIsUndo == true && moveIsRedo == false) {
+                        if (moveIsUndo == true && moveIsRedo == false) {
                             redo.push(move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum]));
                             System.out.println("Saved move " + (move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum])) + " in redo");
                             System.out.println("Redo size now: " + redo.size());
-                        }
-                        else if (moveIsRedo != true){
+                        } else if (moveIsRedo != true) {
                             redo.clear();
                         }
 
 
-                        if(moveIsUndo == false) {
+                        if (moveIsUndo == false) {
                             System.out.println("move saved in undo");
-                            redoValue = playerBoard[rowNum][columnNum];
                             undo.push(move.substring(0, 3) + String.valueOf(playerBoard[rowNum][columnNum]));
                         }
 
@@ -272,12 +337,58 @@ public class Sudoku {
                     System.out.println("ERROR: Invalid input. Try again.");
                     System.out.println("--------------------------------\n");
                 }
-                if(emptySpace(playerBoard) == false && validBoard(playerBoard)){
+                if (emptySpace(playerBoard) == false && validBoard(playerBoard)) {
                     System.out.println("===============================================================");
                     System.out.println("CONGRATULATIONS! You have successfully solved the sudoku board.");
+                    System.out.println("Would you like to save a replay of this game? [y]/[n]");
                     System.out.println("===============================================================");
+                    System.out.print("Response: ");
+                    Scanner saveReplayResponse = new Scanner(System.in);
+                    boolean replayResponseValidator = true;
+                    do {
+                        String replayResponse = saveReplayResponse.nextLine();
+                        if (replayResponse.equalsIgnoreCase("y")) {
+                            int saveSlot = 0;
+                            boolean saveSlotValidator = true;
+                            savedGamesCount++;
+                            if (savedGamesCount > 9) {
+                                savedGamesCount = 9;
+                            }
+                            String allMovesArray = allMoves.toString();
+                            int[] savedBoardSeed = boardSeed;
+
+                            String seedAsString = Arrays.toString(savedBoardSeed);
+                            int[] boardTemplate = getBoardSeed(playerBoard);
+                            System.out.println("Choose your save slot [1-9] (WARNING: If save slot has a replay saved, that replay is overwritten)");
+                            do {
+                                System.out.print("Response: ");
+                                replayResponse = saveReplayResponse.nextLine();
+                                if (replayResponse.length() == 1 && Character.isDigit(replayResponse.charAt(0)) &&
+                                        Character.getNumericValue(replayResponse.charAt(0)) > 0 && Character.getNumericValue(replayResponse.charAt(0)) < 10) {
+                                    saveSlot = Integer.parseInt(replayResponse) - 1;
+                                    System.out.println("Seed as string: " + seedAsString);
+                                    System.out.println("All moves: " + allMovesArray);
+
+                                    String[] rewatchData = {seedAsString, allMovesArray};
+                                    gameReplaysRewatch[saveSlot] = rewatchData;
+                                    gameReplays[saveSlot] = getBoardSeed(playerBoard);
+                                    rewatchGame(gameReplaysRewatch,saveSlot);
+                                } else {
+                                    saveSlotValidator = false;
+                                }
+
+                            } while (saveSlotValidator == false);
+
+                        } else if (replayResponse.equalsIgnoreCase("n")) {
+
+                        } else {
+                            replayResponseValidator = false;
+                            System.out.println("Invalid input. Please try again.");
+                        }
+
+                    } while (replayResponseValidator == false);
+
                     continueGame = false;
-                    inputMove.close();
                     break;
                 }
             }
@@ -287,13 +398,6 @@ public class Sudoku {
             System.out.println(playerBoard[0][1]);
         }
     }
-
-
-
-
-
-
-
 
 
     static int[][] makeGrid(int size) {
@@ -337,16 +441,15 @@ public class Sudoku {
                     System.out.print(" | ");
                 }
                 if ((columnNum + 1) % gridSqrt == 0) {
-                    if(num == 0){
+                    if (num == 0) {
                         System.out.print("X");
-                    }
-                    else{
+                    } else {
                         System.out.print(num);
                     }
                 } else {
-                    if(num == 0){
+                    if (num == 0) {
                         System.out.print("X" + "-");
-                    }else{
+                    } else {
                         System.out.print(num + "-");
                     }
                 }
@@ -525,7 +628,7 @@ public class Sudoku {
     }
 
 
-    private static int[] getBoardSeed(int[][] grid){
+    private static int[] getBoardSeed(int[][] grid) {
         int gridSqrt = (int) Math.sqrt(grid.length);
         int[] seed = new int[grid.length];
         int seedIndex = 0;
@@ -544,6 +647,18 @@ public class Sudoku {
             seedIndex++;
             //System.out.println("grid[" + row + "][" + currentColumn + "]");
             columnIndex += gridSqrt;
+        }
+        return seed;
+    }
+
+    private static int[] getSeedExperimental(int[][] grid) {
+        int[] seed = new int[grid.length * grid.length];
+        int seedIndex = 0;
+        for (int row[] : grid) {
+            for (int num : row) {
+                seed[seedIndex] = num;
+                seedIndex++;
+            }
         }
         return seed;
     }
@@ -573,7 +688,7 @@ public class Sudoku {
                         if (row != grid.length - 1 && column != grid.length - 1) {
                             long checkTime = System.currentTimeMillis();
                             long genTime = checkTime - genStart;
-                            if (genTime > 7000) {
+                            if (genTime > 5000) {
                                 System.out.println("Error generating board, retrying...");
                                 for (int resetRow = 0; resetRow < grid.length; resetRow++) {
                                     for (int resetColumn = 0; resetColumn < grid.length; resetColumn++) {
@@ -592,6 +707,7 @@ public class Sudoku {
                     }
                     return false;
                 }
+                //Clear command prompt
                 //System.out.print("\033[H\033[2J");
                 //System.out.flush();
                 //printGrid(grid);
@@ -602,7 +718,7 @@ public class Sudoku {
         return true;
     }
 
-    private static int[][] generateSeed(int[] seed){
+    private static int[][] generateSeed(int[] seed) {
         int[][] grid = makeGrid(seed.length);
         int gridSqrt = (int) Math.sqrt(grid.length);
         int seedIndex = 0;
@@ -710,5 +826,53 @@ public class Sudoku {
         }
         return false;
     }
-}
 
+    private static void rewatchGame(String[][] data, int slot) throws InterruptedException {
+        String seed = data[slot][0];
+        String seedFormat = seed.replaceAll("\\[", "");
+        seedFormat = seedFormat.replaceAll("]", "");
+        seedFormat = seedFormat.replaceAll(",","");
+        String[] seedFormatArray = seedFormat.split(" ");
+        int[] seedToInt = new int[seedFormatArray.length];
+        for (int i = 0; i < seedFormatArray.length; i++) {
+            seedToInt[i] = Integer.parseInt(seedFormatArray[i]);
+        }
+        int seedIndex = 0;
+        String moves = data[slot][1];
+        String movesFormat = moves.replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ","");
+        String[] allMovesArray = movesFormat.split(",");
+
+        int[][] sudokuGrid = new int[(int) Math.sqrt(seedToInt.length)][(int) Math.sqrt(seedToInt.length)];
+
+        for (int row = 0; row < sudokuGrid.length; row++) {
+            for (int column = 0; column < sudokuGrid.length; column++) {
+                sudokuGrid[row][column] = seedToInt[seedIndex];
+                seedIndex++;
+            }
+        }
+        System.out.println("\n===========================================================================");
+        System.out.println("Initial board");
+        System.out.println("===========================================================================\n");
+        printGrid(sudokuGrid);
+
+        for(String singleMove : allMovesArray){
+            int columnNum = Character.getNumericValue(singleMove.charAt(0)) - 10;
+            int rowNum = Character.getNumericValue(singleMove.charAt(1)) - 1;
+            int inputValue = Character.getNumericValue(singleMove.charAt(2));
+
+
+            sudokuGrid[rowNum][columnNum] = inputValue;
+            Thread.sleep(2000);
+            System.out.println("=====|| Applied move: " + singleMove.charAt(0) + singleMove.charAt(1) + " " + singleMove.charAt(2) + " ||=====================================================");
+            System.out.println( "Column: " + singleMove.charAt(0));
+            System.out.println( "Row: " + singleMove.charAt(1));
+            System.out.println( "Value: " + singleMove.charAt(2) +"\n");
+            printGrid(sudokuGrid);
+            System.out.println("==================================================================================\n\n\n");
+        }
+        System.out.println("Replay complete, returning to menu in 5 seconds");
+        Thread.sleep(5000);
+
+    }
+
+}
