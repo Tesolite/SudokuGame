@@ -196,21 +196,21 @@ public class Sudoku {
                 } else if (difficulty.equalsIgnoreCase("e")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 3);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
-                    System.out.println("\n\n");
+                    System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
                     printGrid(playerBoard);
 
                 //Medium mode hides 4 values in each block
                 } else if (difficulty.equalsIgnoreCase("m")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 4);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
-                    System.out.println("\n\n");
+                    System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
                     printGrid(playerBoard);
 
                //Hard mode hides 5 values in each block
                 } else if (difficulty.equalsIgnoreCase("h")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 5);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
-                    System.out.println("\n\n");
+                    System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
                     printGrid(playerBoard);
 
 
@@ -236,6 +236,7 @@ public class Sudoku {
                 }
 
             } while (validAnswer == false);
+
 
             //A seed for the game, saving values once they have been altered by other methods, such as hideValues.
             //More representative of the game played than methods that save the seeds of the template.
@@ -762,7 +763,7 @@ public class Sudoku {
         int[] seed = new int[grid.length * grid.length];
         int seedIndex = 0;
         //Iterate through all values in grid and save each one in the array.
-        for (int row[] : grid) {
+        for (int[] row : grid) {
             for (int num : row) {
                 seed[seedIndex] = num;
                 seedIndex++; //Point to next index in which value should be stored.
@@ -802,22 +803,31 @@ public class Sudoku {
                         } else {
                             grid[row][column] = 0;
                         }
-                        
-                        if (row != grid.length - 1 && column != grid.length - 1) {
-                            long checkTime = System.currentTimeMillis();
-                            long genTime = checkTime - genStart;
+
+                        //While there is an empty space on the board, check how long backtracking is taking
+                        if (emptySpace(grid) == true) {
+                            long checkTime = System.currentTimeMillis(); //Checks current time
+                            long genTime = checkTime - genStart; //Compare current time to time since backtracking started
+
+                            //If it has been longer than 2.5 seconds since board generation has started, start with a new board.
                             if (genTime > 2500) {
                                 System.out.println("Error generating board, retrying...");
+                                //Reset whole board
                                 for (int resetRow = 0; resetRow < grid.length; resetRow++) {
                                     for (int resetColumn = 0; resetColumn < grid.length; resetColumn++) {
                                         grid[resetRow][resetColumn] = 0;
                                     }
                                 }
+                                //Generate new random values
                                 generateBoard(grid);
+                                //Call this function again
                                 generateBoardComplete(grid);
+
+                                //Reset rows, columns, and values checked
                                 row = 0;
                                 column = 0;
                                 value = 0;
+                                //Reset start timer
                                 genStart = System.currentTimeMillis();
                             }
 
