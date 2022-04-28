@@ -107,7 +107,7 @@ public class Sudoku {
 
 
                 //If the player wants to view their replays, access this screen.
-                if (difficulty.equalsIgnoreCase("view")){
+                else if (difficulty.equalsIgnoreCase("view") && savedGamesCount > 1){
                     //flag for if rewatch is chosen, so that user returns to menu once they have rewatched their game.
                     boolean rewatchFlag = false;
                     System.out.println("===========================");
@@ -186,7 +186,7 @@ public class Sudoku {
 
                 }
                 //If the user wants to exit the program, tell them goodbye and exit the program.
-                if (difficulty.equalsIgnoreCase("exit")) {
+                else if (difficulty.equalsIgnoreCase("exit")) {
                     exitFlag = 1;
                     System.out.println("Goodbye!");
                     System.exit(0);
