@@ -28,7 +28,7 @@ public class Sudoku {
                 System.out.println("------------------------------------------------------------------------------------------------");
                 System.out.println("You have a saved game in progress. Continue? [y]/[n]");
                 System.out.println("------------------------------------------------------------------------------------------------");
-            //Otherwise, generate a new board for the player to play
+                //Otherwise, generate a new board for the player to play
             } else {
                 System.out.println("----------------------------------------------------------------------------------");
                 System.out.println("Generating Board...");
@@ -95,8 +95,8 @@ public class Sudoku {
                     playerBoard = Arrays.stream(savedBoard).map(int[]::clone).toArray(int[][]::new);
                     originalBoard = Arrays.stream(savedOriginalBoard).map(int[]::clone).toArray(int[][]::new);
                     printGrid(playerBoard);
-                //If a user decides not to continue the game, clear the arrays that store this data and
-                //also set the flag to false to indicate that the player does not wish to continue.
+                    //If a user decides not to continue the game, clear the arrays that store this data and
+                    //also set the flag to false to indicate that the player does not wish to continue.
                 } else if (savedBoard != null && difficulty.equalsIgnoreCase("n")) {
                     continueGame = false;
                     savedBoard = null;
@@ -107,12 +107,12 @@ public class Sudoku {
 
 
                 //If the player wants to view their replays, access this screen.
-                else if (difficulty.equalsIgnoreCase("view") && savedGamesCount > 1){
+                else if (difficulty.equalsIgnoreCase("view") && savedGamesCount > 0) {
                     //flag for if rewatch is chosen, so that user returns to menu once they have rewatched their game.
                     boolean rewatchFlag = false;
                     System.out.println("===========================");
-                    for(int i = 0; i < 9; i++){
-                        if(gameReplaysRewatch[i] != null){
+                    for (int i = 0; i < 9; i++) {
+                        if (gameReplaysRewatch[i] != null) {
                             System.out.println("Save slot #[" + (i + 1) + "]");
                         }
                     }
@@ -120,14 +120,14 @@ public class Sudoku {
                     System.out.println("===========================================================================");
                     Scanner replaySelectScan = new Scanner(System.in);
                     boolean validSelection = true;
-                    do{
+                    do {
                         System.out.print("Selection: ");
                         String replaySelect = replaySelectScan.nextLine();
-                        if(replaySelect.equalsIgnoreCase("q")){
+                        if (replaySelect.equalsIgnoreCase("q")) {
                             break;
                         }
                         //Check whether the input is a digit and if it's a single-digit number (only 9 replays can be stored)
-                        else if(Character.isDigit(replaySelect.charAt(0)) && replaySelect.length() == 1) {
+                        else if (Character.isDigit(replaySelect.charAt(0)) && replaySelect.length() == 1) {
                             int saveSlot = Integer.parseInt(replaySelect) - 1; // Subtract 1 from input to account for index offset.
                             //Check if user's choice exists, if it does then offer to either let them replay the game
                             //of watch how they played the game before
@@ -140,33 +140,51 @@ public class Sudoku {
 
                                     //If the user wants to replay the game, set the sudoku board to the same as it was before and
                                     //ask which difficulty they want to play
-                                    if(replaySelect.equalsIgnoreCase("replay")) {
+                                    if (replaySelect.equalsIgnoreCase("replay")) {
                                         sudokuAnswers = generateTemplate(gameReplays[saveSlot]);
                                         System.out.println("Choose your difficulty this time around: [E]asy     [M]edium     [H]ard");
 
                                         //flag to check if difficulty is valid.
                                         boolean validReplayDifficulty;
-                                        do{
+                                        do {
                                             validReplayDifficulty = true;
                                             System.out.print("Difficulty: ");
                                             replaySelect = replaySelectScan.nextLine();
-                                            if(replaySelect.equalsIgnoreCase("e") || replaySelect.equalsIgnoreCase("m") || replaySelect.equalsIgnoreCase("h")){
-                                                difficulty = replaySelect;
-                                                System.out.println(difficulty);
-                                            }else{
+
+                                            //Medium mode hides 3 values in each block
+                                            if (replaySelect.equalsIgnoreCase("e")) {
+                                                playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 3);
+                                                originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                                                System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
+                                                printGrid(playerBoard);
+
+                                                //Medium mode hides 4 values in each block
+                                            } else if (replaySelect.equalsIgnoreCase("m")) {
+                                                playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 4);
+                                                originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                                                System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
+                                                printGrid(playerBoard);
+
+                                                //Hard mode hides 5 values in each block
+                                            } else if (replaySelect.equalsIgnoreCase("h")) {
+                                                playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 5);
+                                                originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
+                                                System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
+                                                printGrid(playerBoard);
+                                            } else {
                                                 validReplayDifficulty = false;
                                                 System.out.println("Invalid difficulty. Try again");
                                             }
-                                        }while(validReplayDifficulty == false);
+                                        } while (validReplayDifficulty == false);
 
-                                    //If the user wants to rewatch the game, call the rewatchGame method to perform that functionality
-                                    //Also set the rewatch flag to true so that the user returns to the menu one they have watched the game.
-                                    }else if(replaySelect.equalsIgnoreCase("rewatch")){
+                                        //If the user wants to rewatch the game, call the rewatchGame method to perform that functionality
+                                        //Also set the rewatch flag to true so that the user returns to the menu one they have watched the game.
+                                    } else if (replaySelect.equalsIgnoreCase("rewatch")) {
                                         rewatchFlag = true;
                                         rewatchGame(gameReplaysRewatch, saveSlot);
                                         break;
 
-                                    }else{
+                                    } else {
                                         validChoice = false;
                                         System.out.println("Invalid choice. Try again.");
                                     }
@@ -176,10 +194,10 @@ public class Sudoku {
                                 validSelection = false;
                             }
                         }
-                    }while(validSelection == false);
+                    } while (validSelection == false);
 
                     //Stop executing the code below if the user has chosen to rewatch the game, so that they return to menu.
-                    if(rewatchFlag == true){
+                    if (rewatchFlag == true) {
                         continueGame = false;
                         break;
                     }
@@ -191,22 +209,22 @@ public class Sudoku {
                     System.out.println("Goodbye!");
                     System.exit(0);
 
-                //Otherwise, if a valid difficulty is entered, modify the board accordingly
-                //Easy mode hides 3 values in each block
+                    //Otherwise, if a valid difficulty is entered, modify the board accordingly
+                    //Easy mode hides 3 values in each block
                 } else if (difficulty.equalsIgnoreCase("e")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 3);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
                     System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
                     printGrid(playerBoard);
 
-                //Medium mode hides 4 values in each block
+                    //Medium mode hides 4 values in each block
                 } else if (difficulty.equalsIgnoreCase("m")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 4);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
                     System.out.println("\n\n" + "====".repeat(2) + " GAME START " + "====".repeat(3) + "\n");
                     printGrid(playerBoard);
 
-               //Hard mode hides 5 values in each block
+                    //Hard mode hides 5 values in each block
                 } else if (difficulty.equalsIgnoreCase("h")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 5);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
@@ -214,18 +232,18 @@ public class Sudoku {
                     printGrid(playerBoard);
 
 
-                //Two hidden difficulties, implemented in order to allow for testing of the program. Normal users
-                //will remain unaware of these features as they are not listed anywhere.
+                    //Two hidden difficulties, implemented in order to allow for testing of the program. Normal users
+                    //will remain unaware of these features as they are not listed anywhere.
 
-                //babyMode difficulty only hides one value per block
+                    //babyMode difficulty only hides one value per block
                 } else if (difficulty.equalsIgnoreCase("babyMode")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 1);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
                     printGrid(playerBoard);
 
-                //veryVeryCleverr hides no values on the board and provides a fast way to win the game and test
-                //features (mainly replay features) that are available once the board has been completed.
-                //A feature purely for testing specific methods, and as such introduces some bugs that would otherwise not exist.
+                    //veryVeryCleverr hides no values on the board and provides a fast way to win the game and test
+                    //features (mainly replay features) that are available once the board has been completed.
+                    //A feature purely for testing specific methods, and as such introduces some bugs that would otherwise not exist.
                 } else if (difficulty.equalsIgnoreCase("veryVeryCleverr")) {
                     playerBoard = hideValues(Arrays.stream(sudokuAnswers).map(int[]::clone).toArray(int[][]::new), 0);
                     originalBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
@@ -263,7 +281,7 @@ public class Sudoku {
                             savedBoard = Arrays.stream(playerBoard).map(int[]::clone).toArray(int[][]::new);
                             savedOriginalBoard = Arrays.stream(originalBoard).map(int[]::clone).toArray(int[][]::new);
 
-                        //If they quit without saving their progress, they lose. Prompt return to menu.
+                            //If they quit without saving their progress, they lose. Prompt return to menu.
                         } else if (move.equals("n")) {
                             savedBoard = null;
                             savedOriginalBoard = null;
@@ -276,7 +294,7 @@ public class Sudoku {
                                 move = inputMove.nextLine();
                                 if (move.equalsIgnoreCase("y")) {
                                     break;
-                                //If user chooses to stop playing, set exitFlag to 1 to signal to the program to terminate.
+                                    //If user chooses to stop playing, set exitFlag to 1 to signal to the program to terminate.
                                 } else if (move.equalsIgnoreCase("n")) {
                                     exitFlag = 1;
                                     System.out.println("Thank you for playing, goodbye!");
@@ -293,7 +311,7 @@ public class Sudoku {
                     //Leave current game.
                     break;
 
-                //Print out a list of commands that are available to the user while they are playing.
+                    //Print out a list of commands that are available to the user while they are playing.
                 } else if (move.equalsIgnoreCase("help")) {
                     System.out.println("\n\n\n" + "------".repeat(10));
                     System.out.println();
@@ -308,7 +326,7 @@ public class Sudoku {
                     printGrid(playerBoard);
                     continue;
 
-                //Undo previous move
+                    //Undo previous move
                 } else if (move.equalsIgnoreCase("undo")) {
                     if (undo.empty() == false) {
                         //Set flag indicator to true to inform the game that next move is caused by undo function
@@ -321,7 +339,7 @@ public class Sudoku {
                         continue;
                     }
 
-                //Redo a previously undone move
+                    //Redo a previously undone move
                 } else if (move.equalsIgnoreCase("redo")) {
                     if (redo.empty() == false) {
                         //Pop value from stack and set as next move. Also flag move as redo move.
@@ -359,7 +377,7 @@ public class Sudoku {
                         System.out.println("\n-----------------------------------------------");
                         System.out.println("ERROR: Cannot change values of pre-set squares.");
                         System.out.println("-----------------------------------------------\n");
-                    //If move is allowed, play it.
+                        //If move is allowed, play it.
                     } else {
                         System.out.println("\n\n" + "~~~~~~~".repeat(playerBoard.length));
                         System.out.println("\n| Played move [" + move + "]... |\n");
@@ -370,7 +388,7 @@ public class Sudoku {
                         if (moveIsUndo == true && moveIsRedo == false) {
                             redo.push(move.substring(0, 3) + playerBoard[rowNum][columnNum]);
 
-                        //If the move being played isn't one caused by undo or redo, clear the stack.
+                            //If the move being played isn't one caused by undo or redo, clear the stack.
                         } else if (moveIsRedo != true) {
                             redo.clear();
                         }
@@ -461,16 +479,6 @@ public class Sudoku {
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 
     //Makes a grid of specified size using 2D array. This program only made grids of size 9.
@@ -653,7 +661,7 @@ public class Sudoku {
                     //A new block has started, so the previous values is set to the current amount of completed blocks in row.
                     previousBlocksInRow = blocksInRow;
 
-                //If the length of the grid has been covered by the blocks, move onto the next set of rows.
+                    //If the length of the grid has been covered by the blocks, move onto the next set of rows.
                 } else if (blocksInRow == gridSqrt) {
                     //Set the starting row for the next block to be back at the start of the grid.
                     blockStartRow = currentRow + 1;
@@ -777,8 +785,8 @@ public class Sudoku {
     private static boolean generateBoardComplete(int[][] grid) {
         long genStart = System.currentTimeMillis(); //Variable that stores the time at which board generation has been started
 
-        if(emptySpace(grid) == false){
-            return  true;
+        if (emptySpace(grid) == false) {
+            return true;
         }
 
         //Iterate through each value in the grid that was passed in as a parameter
@@ -974,7 +982,7 @@ public class Sudoku {
         //Format the seed string so that the values stored in it can be retrieved
         String seedFormat = seed.replaceAll("\\[", "");
         seedFormat = seedFormat.replaceAll("]", "");
-        seedFormat = seedFormat.replaceAll(",","");
+        seedFormat = seedFormat.replaceAll(",", "");
         //Split up each value of the seed into its own string
         String[] seedFormatArray = seedFormat.split(" ");
         //Create an int array to store all seed values as they are processed
@@ -988,7 +996,7 @@ public class Sudoku {
         String moves = data[slot][1]; //Retrieves the string containing all moves made in the game, stored as the second string in the 2D array
 
         //Format the string of moves so that they can be processed as moves once again.
-        String movesFormat = moves.replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ","");
+        String movesFormat = moves.replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
         //Separate each move stored into its own string
         String[] allMovesArray = movesFormat.split(",");
 
@@ -1010,7 +1018,7 @@ public class Sudoku {
         printGrid(sudokuGrid);
 
         //Convert all move strings into valid moves for the board and play them out
-        for(String singleMove : allMovesArray){
+        for (String singleMove : allMovesArray) {
             int columnNum = Character.getNumericValue(singleMove.charAt(0)) - 10;
             int rowNum = Character.getNumericValue(singleMove.charAt(1)) - 1;
             int inputValue = Character.getNumericValue(singleMove.charAt(2));
@@ -1019,9 +1027,9 @@ public class Sudoku {
             sudokuGrid[rowNum][columnNum] = inputValue;
             Thread.sleep(2000); //A 2 second delay between each move so that they can be properly observed
             System.out.println("=====|| Applied move: " + singleMove.charAt(0) + singleMove.charAt(1) + " " + singleMove.charAt(2) + " ||=====================================================");
-            System.out.println( "Column: " + singleMove.charAt(0));
-            System.out.println( "Row: " + singleMove.charAt(1));
-            System.out.println( "Value: " + singleMove.charAt(2) +"\n");
+            System.out.println("Column: " + singleMove.charAt(0));
+            System.out.println("Row: " + singleMove.charAt(1));
+            System.out.println("Value: " + singleMove.charAt(2) + "\n");
             printGrid(sudokuGrid);
             System.out.println("==================================================================================\n\n\n");
         }
