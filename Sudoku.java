@@ -124,6 +124,7 @@ public class Sudoku {
                         System.out.print("Selection: ");
                         String replaySelect = replaySelectScan.nextLine();
                         if (replaySelect.equalsIgnoreCase("q")) {
+                            continueGame = false;
                             break;
                         }
                         //Check whether the input is a digit and if it's a single-digit number (only 9 replays can be stored)
