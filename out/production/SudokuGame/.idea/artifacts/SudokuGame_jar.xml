@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SudokuGame:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SudokuGame_jar</output-path>
+    <root id="archive" name="SudokuGame.jar">
+      <element id="module-output" name="SudokuGame" />
+    </root>
+  </artifact>
+</component>
